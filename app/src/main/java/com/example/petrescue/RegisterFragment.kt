@@ -5,25 +5,25 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.activityViewModels
+import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.example.petrescue.databinding.FragmentLoginBinding
+import com.example.petrescue.databinding.FragmentRegisterBinding
 
-class LoginFragment : Fragment() {
+class RegisterFragment : Fragment() {
 
-    private var _binding: FragmentLoginBinding? = null
+    private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
     
-    // Use activityViewModels to share the same instance with ProfileFragment
-    private val viewModel: AuthViewModel by activityViewModels()
+    private val viewModel: AuthViewModel by viewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
         container: ViewGroup?,
         savedInstanceState: Bundle?
     ): View {
-        _binding = FragmentLoginBinding.inflate(inflater, container, false)
+        _binding = FragmentRegisterBinding.inflate(inflater, container, false)
         return binding.root
     }
 
@@ -32,31 +32,37 @@ class LoginFragment : Fragment() {
         
         setupObservers()
         
-        binding.btnLogin.setOnClickListener {
+        binding.btnRegister.setOnClickListener {
+            val username = binding.etUsername.text.toString().trim()
             val email = binding.etEmail.text.toString().trim()
             val password = binding.etPassword.text.toString().trim()
+            val confirmPassword = binding.etConfirmPassword.text.toString().trim()
             
-            if (email.isNotEmpty() && password.isNotEmpty()) {
-                viewModel.login(email, password)
+            if (username.isNotEmpty() && email.isNotEmpty() && password.isNotEmpty() && confirmPassword.isNotEmpty()) {
+                if (password == confirmPassword) {
+                    viewModel.signUp(username, email, password)
+                } else {
+                    Toast.makeText(requireContext(), "Passwords do not match", Toast.LENGTH_SHORT).show()
+                }
             } else {
                 Toast.makeText(requireContext(), "Please fill all fields", Toast.LENGTH_SHORT).show()
             }
         }
         
-        binding.tvRegister.setOnClickListener {
-            findNavController().navigate(R.id.action_loginFragment_to_registerFragment)
+        binding.tvLogin.setOnClickListener {
+            findNavController().navigateUp()
         }
     }
     
     private fun setupObservers() {
-        // Observe Firebase login
+        // Observe Firebase login state
         viewModel.userLiveData.observe(viewLifecycleOwner) { user ->
             if (user != null) {
                 navigateToProfile()
             }
         }
 
-        // Observe Local (Room) login fallback
+        // Observe Local (Room) login state fallback
         viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
             if (user != null) {
                 navigateToProfile()
@@ -68,13 +74,15 @@ class LoginFragment : Fragment() {
         }
         
         viewModel.loadingLiveData.observe(viewLifecycleOwner) { isLoading ->
-            binding.btnLogin.isEnabled = !isLoading
+            binding.progressBar.isVisible = isLoading
+            binding.btnRegister.isEnabled = !isLoading
         }
     }
 
     private fun navigateToProfile() {
-        if (findNavController().currentDestination?.id == R.id.loginFragment) {
-            findNavController().navigate(R.id.action_loginFragment_to_profileFragment)
+        val currentDest = findNavController().currentDestination?.id
+        if (currentDest == R.id.registerFragment) {
+            findNavController().navigate(R.id.action_registerFragment_to_profileFragment)
         }
     }
 

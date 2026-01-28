@@ -65,21 +65,33 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         _loadingLiveData.value = true
         
         viewModelScope.launch {
+            // Check if email already exists locally
+            val existingUser = userDao.getUserByEmail(email)
+            if (existingUser != null) {
+                _loadingLiveData.postValue(false)
+                _errorLiveData.postValue("An account with this email already exists.")
+                return@launch
+            }
+
             val newUser = User(email, username, pass)
-            userDao.insertUser(newUser)
             
             if (auth != null && auth.app.options.apiKey != "YOUR_API_KEY") {
                 auth.createUserWithEmailAndPassword(email, pass)
                     .addOnCompleteListener { task ->
-                        _loadingLiveData.postValue(false)
                         if (task.isSuccessful) {
-                            _userLiveData.postValue(auth.currentUser)
+                            viewModelScope.launch {
+                                userDao.insertUser(newUser)
+                                _loadingLiveData.postValue(false)
+                                _userLiveData.postValue(auth.currentUser)
+                            }
                         } else {
-                            // If Firebase fails, we still navigate because local save succeeded
-                            _localUserLiveData.postValue(newUser)
+                            _loadingLiveData.postValue(false)
+                            _errorLiveData.postValue(task.exception?.message ?: "Registration failed")
                         }
                     }
             } else {
+                // If no Firebase, just use local
+                userDao.insertUser(newUser)
                 _loadingLiveData.postValue(false)
                 _localUserLiveData.postValue(newUser)
             }

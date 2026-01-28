@@ -36,6 +36,13 @@
         android:id="@+id/profileFragment"
         android:name="com.example.petrescue.ProfileFragment"
         android:label="Profile"
-        tools:layout="@layout/fragment_profile" />
+        tools:layout="@layout/fragment_profile">
+        <argument
+            android:name="username"
+            app:argType="string" />
+        <argument
+            android:name="email"
+            app:argType="string" />
+    </fragment>
 
 </navigation>

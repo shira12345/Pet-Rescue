@@ -14,7 +14,6 @@ class ProfileFragment : Fragment() {
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
     
-    // Use activityViewModels to share the same instance across fragments
     private val viewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
@@ -29,16 +28,27 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // Observe changes to the user state
+        // 1. Retrieve and display arguments passed during navigation
+        val passedUsername = arguments?.getString("username")
+        val passedEmail = arguments?.getString("email")
+        
+        if (passedUsername != null) {
+            binding.tvUsername.text = passedUsername
+        }
+        if (passedEmail != null) {
+            binding.tvUserEmail.text = passedEmail
+        }
+
+        // 2. Fallback/Sync with ViewModel state
         viewModel.userLiveData.observe(viewLifecycleOwner) { firebaseUser ->
-            if (firebaseUser != null) {
+            if (firebaseUser != null && binding.tvUserEmail.text == "---") {
                 binding.tvUserEmail.text = firebaseUser.email
                 binding.tvUsername.text = firebaseUser.displayName ?: "Firebase User"
             }
         }
 
         viewModel.localUserLiveData.observe(viewLifecycleOwner) { localUser ->
-            if (localUser != null) {
+            if (localUser != null && binding.tvUserEmail.text == "---") {
                 binding.tvUserEmail.text = localUser.email
                 binding.tvUsername.text = localUser.username
             }
@@ -47,6 +57,8 @@ class ProfileFragment : Fragment() {
         // Handle Logout
         binding.btnLogout.setOnClickListener {
             viewModel.logout()
+            // Clear arguments when logging out
+            arguments?.clear()
             findNavController().navigate(R.id.loginFragment)
         }
     }

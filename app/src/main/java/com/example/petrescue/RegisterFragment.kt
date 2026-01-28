@@ -5,9 +5,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
-import androidx.fragment.app.viewModels
+import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.petrescue.databinding.FragmentRegisterBinding
 
@@ -16,7 +17,7 @@ class RegisterFragment : Fragment() {
     private var _binding: FragmentRegisterBinding? = null
     private val binding get() = _binding!!
     
-    private val viewModel: AuthViewModel by viewModels()
+    private val viewModel: AuthViewModel by activityViewModels()
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -55,17 +56,16 @@ class RegisterFragment : Fragment() {
     }
     
     private fun setupObservers() {
-        // Observe Firebase login state
         viewModel.userLiveData.observe(viewLifecycleOwner) { user ->
             if (user != null) {
-                navigateToProfile()
+                // If we're signing up via Firebase, username might be display name or empty
+                navigateToProfile(user.displayName ?: "User", user.email ?: "")
             }
         }
 
-        // Observe Local (Room) login state fallback
         viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
             if (user != null) {
-                navigateToProfile()
+                navigateToProfile(user.username, user.email)
             }
         }
         
@@ -79,10 +79,13 @@ class RegisterFragment : Fragment() {
         }
     }
 
-    private fun navigateToProfile() {
-        val currentDest = findNavController().currentDestination?.id
-        if (currentDest == R.id.registerFragment) {
-            findNavController().navigate(R.id.action_registerFragment_to_profileFragment)
+    private fun navigateToProfile(username: String, email: String) {
+        if (findNavController().currentDestination?.id == R.id.registerFragment) {
+            val bundle = bundleOf(
+                "username" to username,
+                "email" to email
+            )
+            findNavController().navigate(R.id.action_registerFragment_to_profileFragment, bundle)
         }
     }
 

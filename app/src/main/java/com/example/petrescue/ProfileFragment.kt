@@ -39,7 +39,6 @@ class ProfileFragment : Fragment() {
             binding.tvUserEmail.text = passedEmail
         }
 
-        // 2. Fallback/Sync with ViewModel state
         viewModel.userLiveData.observe(viewLifecycleOwner) { firebaseUser ->
             if (firebaseUser != null && binding.tvUserEmail.text == "---") {
                 binding.tvUserEmail.text = firebaseUser.email
@@ -54,10 +53,8 @@ class ProfileFragment : Fragment() {
             }
         }
 
-        // Handle Logout
         binding.btnLogout.setOnClickListener {
             viewModel.logout()
-            // Clear arguments when logging out
             arguments?.clear()
             findNavController().navigate(R.id.loginFragment)
         }

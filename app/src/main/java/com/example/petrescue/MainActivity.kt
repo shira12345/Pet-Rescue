@@ -12,17 +12,13 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        
-        // IMPORTANT: Replace these with your actual Firebase project values 
-        // until you add the google-services.json file.
-        // You can find these values in the Firebase Console under Project Settings.
         try {
             FirebaseApp.getInstance()
         } catch (e: Exception) {
             val options = FirebaseOptions.Builder()
-                .setApplicationId("YOUR_APP_ID") // e.g., "1:123456789:android:abc123"
-                .setApiKey("YOUR_API_KEY")       // e.g., "AIzaSy..."
-                .setProjectId("YOUR_PROJECT_ID") // e.g., "petrescue-123"
+                .setApplicationId("APP_ID")
+                .setApiKey("API_KEY")
+                .setProjectId("PROJECT_ID")
                 .build()
             FirebaseApp.initializeApp(this, options)
         }

@@ -22,8 +22,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     private val _localUserLiveData = MutableLiveData<User?>()
     val localUserLiveData: LiveData<User?> = _localUserLiveData
 
-    private val _errorLiveData = MutableLiveData<String>()
-    val errorLiveData: LiveData<String> = _errorLiveData
+    private val _errorLiveData = MutableLiveData<String?>()
+    val errorLiveData: LiveData<String?> = _errorLiveData
 
     private val _loadingLiveData = MutableLiveData<Boolean>()
     val loadingLiveData: LiveData<Boolean> = _loadingLiveData
@@ -32,13 +32,18 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         _userLiveData.value = auth?.currentUser
     }
 
+    fun clearError() {
+        _errorLiveData.value = null
+    }
+
     fun login(email: String, pass: String) {
+        clearError()
         _loadingLiveData.value = true
         
         viewModelScope.launch {
             val localUser = userDao.getUserByEmail(email)
             
-            if (auth != null && auth.app.options.apiKey != "YOUR_API_KEY") {
+            if (auth != null && auth.app.options.apiKey != "API_KEY") {
                 auth.signInWithEmailAndPassword(email, pass)
                     .addOnCompleteListener { task ->
                         _loadingLiveData.postValue(false)
@@ -47,7 +52,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         } else if (localUser != null && localUser.password == pass) {
                             _localUserLiveData.postValue(localUser)
                         } else {
-                            _errorLiveData.postValue(task.exception?.message ?: "Login failed")
+                            _errorLiveData.postValue("Invalid email or password")
                         }
                     }
             } else {
@@ -62,10 +67,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
 
     fun signUp(username: String, email: String, pass: String) {
+        clearError()
         _loadingLiveData.value = true
         
         viewModelScope.launch {
-            // Check if email already exists locally
             val existingUser = userDao.getUserByEmail(email)
             if (existingUser != null) {
                 _loadingLiveData.postValue(false)
@@ -75,7 +80,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
             val newUser = User(email, username, pass)
             
-            if (auth != null && auth.app.options.apiKey != "YOUR_API_KEY") {
+            if (auth != null && auth.app.options.apiKey != "API_KEY") {
                 auth.createUserWithEmailAndPassword(email, pass)
                     .addOnCompleteListener { task ->
                         if (task.isSuccessful) {
@@ -90,7 +95,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }
             } else {
-                // If no Firebase, just use local
                 userDao.insertUser(newUser)
                 _loadingLiveData.postValue(false)
                 _localUserLiveData.postValue(newUser)
@@ -102,5 +106,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         auth?.signOut()
         _userLiveData.value = null
         _localUserLiveData.value = null
+        clearError()
     }
 }

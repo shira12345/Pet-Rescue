@@ -51,6 +51,7 @@ class RegisterFragment : Fragment() {
         }
         
         binding.tvLogin.setOnClickListener {
+            viewModel.clearError()
             findNavController().navigateUp()
         }
     }
@@ -58,7 +59,6 @@ class RegisterFragment : Fragment() {
     private fun setupObservers() {
         viewModel.userLiveData.observe(viewLifecycleOwner) { user ->
             if (user != null) {
-                // If we're signing up via Firebase, username might be display name or empty
                 navigateToProfile(user.displayName ?: "User", user.email ?: "")
             }
         }
@@ -70,7 +70,10 @@ class RegisterFragment : Fragment() {
         }
         
         viewModel.errorLiveData.observe(viewLifecycleOwner) { error ->
-            Toast.makeText(requireContext(), error, Toast.LENGTH_LONG).show()
+            error?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                viewModel.clearError()
+            }
         }
         
         viewModel.loadingLiveData.observe(viewLifecycleOwner) { isLoading ->

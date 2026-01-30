@@ -1,6 +1,7 @@
 package com.example.petrescue
 
 import android.app.Application
+import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
@@ -13,7 +14,13 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
-    private val auth = try { FirebaseAuth.getInstance() } catch (e: Exception) { null }
+  private val auth = try {
+        FirebaseAuth.getInstance() 
+    } catch (e: Exception) { 
+        Log.e("Error", "Firebase not initialized.", e)
+        null 
+    }
+    
     private val userDao = AppDatabase.getDatabase(application).userDao()
 
     private val _userLiveData = MutableLiveData<FirebaseUser?>()
@@ -43,6 +50,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val localUser = userDao.getUserByEmail(email)
             
+            // Check if Firebase is available and has a valid API Key
             if (auth != null && auth.app.options.apiKey != "API_KEY") {
                 auth.signInWithEmailAndPassword(email, pass)
                     .addOnCompleteListener { task ->
@@ -56,6 +64,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }
             } else {
+                // If Firebase failed to initialize, use Local SQLite immediately
                 _loadingLiveData.postValue(false)
                 if (localUser != null && localUser.password == pass) {
                     _localUserLiveData.postValue(localUser)

@@ -50,7 +50,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         viewModelScope.launch {
             val localUser = userDao.getUserByEmail(email)
             
-            // Check if Firebase is available and has a valid API Key
             if (auth != null && auth.app.options.apiKey != "API_KEY") {
                 auth.signInWithEmailAndPassword(email, pass)
                     .addOnCompleteListener { task ->
@@ -64,7 +63,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         }
                     }
             } else {
-                // If Firebase failed to initialize, use Local SQLite immediately
                 _loadingLiveData.postValue(false)
                 if (localUser != null && localUser.password == pass) {
                     _localUserLiveData.postValue(localUser)

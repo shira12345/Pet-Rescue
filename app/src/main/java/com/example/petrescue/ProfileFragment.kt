@@ -28,7 +28,6 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        // 1. Retrieve and display arguments passed during navigation
         val passedUsername = arguments?.getString("username")
         val passedEmail = arguments?.getString("email")
         

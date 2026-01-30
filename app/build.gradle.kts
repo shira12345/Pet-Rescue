@@ -3,7 +3,6 @@ plugins {
   alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.ksp)
-  // alias(libs.plugins.google.services) // Commented out to fix build error. REQUIRES google-services.json to enable.
 }
 
 android {
@@ -44,35 +43,22 @@ dependencies {
   implementation(libs.androidx.lifecycle.runtime.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.ktx)
   implementation(libs.androidx.lifecycle.viewmodel.compose)
-  
-  // Compose
   implementation(libs.androidx.activity.compose)
   implementation(platform(libs.androidx.compose.bom))
   implementation(libs.androidx.compose.ui)
   implementation(libs.androidx.compose.ui.graphics)
   implementation(libs.androidx.compose.ui.tooling.preview)
   implementation(libs.androidx.compose.material3)
-  
-  // Navigation
   implementation(libs.androidx.navigation.fragment)
   implementation(libs.androidx.navigation.ui)
   implementation(libs.androidx.navigation.compose)
-  
-  // Fragments
   implementation(libs.androidx.fragment)
-  
-  // Room (SQLite)
   implementation(libs.androidx.room.runtime)
   implementation(libs.androidx.room.ktx)
   ksp(libs.androidx.room.compiler)
-  
-  // Firebase
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)
-  
-  // JWT
   implementation(libs.java.jwt)
-
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)

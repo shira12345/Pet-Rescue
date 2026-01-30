@@ -65,7 +65,7 @@ class LoginFragment : Fragment() {
         viewModel.errorLiveData.observe(viewLifecycleOwner) { error ->
             error?.let {
                 Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-                viewModel.clearError() // Clear error after showing it
+                viewModel.clearError()
             }
         }
         

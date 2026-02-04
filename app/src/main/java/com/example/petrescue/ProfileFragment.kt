@@ -48,7 +48,6 @@ class ProfileFragment : Fragment() {
         
         currentEmail = arguments?.getString("email") ?: ""
         
-        // Load the latest data from SQLite
         viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
             user?.let {
                 binding.tvUsername.text = it.username
@@ -56,7 +55,6 @@ class ProfileFragment : Fragment() {
                 binding.etPhone.setText(it.phoneNumber)
                 binding.etAnimal.setText(it.animal)
                 
-                // Load the unique path from SQLite for this specific user
                 if (internalImageUri == null && !it.profileImage.isNullOrEmpty()) {
                     val file = File(it.profileImage!!)
                     if (file.exists()) {
@@ -74,7 +72,6 @@ class ProfileFragment : Fragment() {
             val phone = binding.etPhone.text.toString().trim()
             val animal = binding.etAnimal.text.toString().trim()
             
-            // Save the unique file path (or null if deleted)
             val imagePath = internalImageUri?.path
             
             viewModel.updateProfile(email, username, phone, animal, imagePath)
@@ -83,7 +80,7 @@ class ProfileFragment : Fragment() {
 
         binding.btnLogout.setOnClickListener {
             viewModel.logout()
-            internalImageUri = null // Reset local state
+            internalImageUri = null
             findNavController().navigate(R.id.action_profileFragment_to_loginFragment)
         }
         
@@ -91,15 +88,11 @@ class ProfileFragment : Fragment() {
             imagePickerLauncher.launch("image/*")
         }
 
-        // Handle Delete Image logic
         binding.fabDeleteImage.setOnClickListener {
-            // 1. Reset local state
             internalImageUri = null
             
-            // 2. Clear UI instantly
             binding.ivProfileImage.setImageResource(R.drawable.logo)
             
-            // 3. Delete physical file (optional but good practice)
             currentEmail?.let { email ->
                 val fileName = "profile_${email.hashCode()}.jpg"
                 val file = File(requireContext().filesDir, fileName)
@@ -110,11 +103,9 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // This helper ensures each user has their own unique image file
     private fun saveImageToInternalStorage(uri: Uri, email: String): File? {
         return try {
             val inputStream = requireContext().contentResolver.openInputStream(uri)
-            // Create a unique filename based on the user's email
             val fileName = "profile_${email.hashCode()}.jpg"
             val file = File(requireContext().filesDir, fileName)
             val outputStream = FileOutputStream(file)

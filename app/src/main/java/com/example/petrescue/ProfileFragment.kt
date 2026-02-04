@@ -22,10 +22,11 @@ class ProfileFragment : Fragment() {
     
     private val viewModel: AuthViewModel by activityViewModels()
     private var internalImageUri: Uri? = null
+    private var currentEmail: String? = null
 
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            val savedFile = saveImageToInternalStorage(it)
+            val savedFile = currentEmail?.let { email -> saveImageToInternalStorage(it, email) }
             if (savedFile != null) {
                 internalImageUri = Uri.fromFile(savedFile)
                 Picasso.get().load(savedFile).into(binding.ivProfileImage)
@@ -45,7 +46,7 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        val passedEmail = arguments?.getString("email") ?: ""
+        currentEmail = arguments?.getString("email") ?: ""
         
         // Load the latest data from SQLite
         viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
@@ -55,11 +56,13 @@ class ProfileFragment : Fragment() {
                 binding.etPhone.setText(it.phoneNumber)
                 binding.etAnimal.setText(it.animal)
                 
-                // 3. Load the permanent path from SQLite
+                // Load the unique path from SQLite for this specific user
                 if (internalImageUri == null && !it.profileImage.isNullOrEmpty()) {
                     val file = File(it.profileImage!!)
                     if (file.exists()) {
                         Picasso.get().load(file).into(binding.ivProfileImage)
+                    } else {
+                        binding.ivProfileImage.setImageResource(R.drawable.logo)
                     }
                 }
             }
@@ -71,15 +74,16 @@ class ProfileFragment : Fragment() {
             val phone = binding.etPhone.text.toString().trim()
             val animal = binding.etAnimal.text.toString().trim()
             
-            // 4. Save the permanent file path into Rooms
+            // Save the unique file path
             val imagePath = internalImageUri?.path
             
             viewModel.updateProfile(email, username, phone, animal, imagePath)
-            Toast.makeText(requireContext(), "Profile Saved to SQLite!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Profile Saved!", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnLogout.setOnClickListener {
             viewModel.logout()
+            internalImageUri = null // Reset local state
             findNavController().navigate(R.id.action_profileFragment_to_loginFragment)
         }
         
@@ -88,11 +92,13 @@ class ProfileFragment : Fragment() {
         }
     }
 
-    // This helper ensures the image is stored inside the app's folder forever
-    private fun saveImageToInternalStorage(uri: Uri): File? {
+    // This helper ensures each user has their own unique image file
+    private fun saveImageToInternalStorage(uri: Uri, email: String): File? {
         return try {
             val inputStream = requireContext().contentResolver.openInputStream(uri)
-            val file = File(requireContext().filesDir, "profile_image.jpg")
+            // Create a unique filename based on the user's email
+            val fileName = "profile_${email.hashCode()}.jpg"
+            val file = File(requireContext().filesDir, fileName)
             val outputStream = FileOutputStream(file)
             inputStream?.use { input ->
                 outputStream.use { output ->

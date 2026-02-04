@@ -12,6 +12,8 @@ import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.petrescue.databinding.FragmentProfileBinding
 import com.squareup.picasso.Picasso
+import java.io.File
+import java.io.FileOutputStream
 
 class ProfileFragment : Fragment() {
 
@@ -19,12 +21,15 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val viewModel: AuthViewModel by activityViewModels()
-    private var selectedImageUri: Uri? = null
+    private var internalImageUri: Uri? = null
 
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            selectedImageUri = it
-            Picasso.get().load(it).into(binding.ivProfileImage)
+            val savedFile = saveImageToInternalStorage(it)
+            if (savedFile != null) {
+                internalImageUri = Uri.fromFile(savedFile)
+                Picasso.get().load(savedFile).into(binding.ivProfileImage)
+            }
         }
     }
 
@@ -40,13 +45,9 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        val passedUsername = arguments?.getString("username")
-        val passedEmail = arguments?.getString("email")
+        val passedEmail = arguments?.getString("email") ?: ""
         
-        binding.tvUsername.text = passedUsername ?: "---"
-        binding.tvEmail.text = passedEmail ?: "---"
-
-        // Load data from database
+        // Load the latest data from SQLite
         viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
             user?.let {
                 binding.tvUsername.text = it.username
@@ -54,9 +55,12 @@ class ProfileFragment : Fragment() {
                 binding.etPhone.setText(it.phoneNumber)
                 binding.etAnimal.setText(it.animal)
                 
-                // Load saved image if exists and no new image is selected
-                if (selectedImageUri == null && !it.profileImage.isNullOrEmpty()) {
-                    Picasso.get().load(Uri.parse(it.profileImage)).into(binding.ivProfileImage)
+                // 3. Load the permanent path from SQLite
+                if (internalImageUri == null && !it.profileImage.isNullOrEmpty()) {
+                    val file = File(it.profileImage!!)
+                    if (file.exists()) {
+                        Picasso.get().load(file).into(binding.ivProfileImage)
+                    }
                 }
             }
         }
@@ -66,20 +70,38 @@ class ProfileFragment : Fragment() {
             val username = binding.tvUsername.text.toString()
             val phone = binding.etPhone.text.toString().trim()
             val animal = binding.etAnimal.text.toString().trim()
-            val imagePath = selectedImageUri?.toString()
+            
+            // 4. Save the permanent file path into Rooms
+            val imagePath = internalImageUri?.path
             
             viewModel.updateProfile(email, username, phone, animal, imagePath)
-            Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
+            Toast.makeText(requireContext(), "Profile Saved to SQLite!", Toast.LENGTH_SHORT).show()
         }
 
         binding.btnLogout.setOnClickListener {
             viewModel.logout()
-            arguments?.clear()
             findNavController().navigate(R.id.action_profileFragment_to_loginFragment)
         }
         
         binding.fabEditImage.setOnClickListener {
             imagePickerLauncher.launch("image/*")
+        }
+    }
+
+    // This helper ensures the image is stored inside the app's folder forever
+    private fun saveImageToInternalStorage(uri: Uri): File? {
+        return try {
+            val inputStream = requireContext().contentResolver.openInputStream(uri)
+            val file = File(requireContext().filesDir, "profile_image.jpg")
+            val outputStream = FileOutputStream(file)
+            inputStream?.use { input ->
+                outputStream.use { output ->
+                    input.copyTo(output)
+                }
+            }
+            file
+        } catch (e: Exception) {
+            null
         }
     }
 

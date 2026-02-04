@@ -80,7 +80,7 @@ class LoginFragment : Fragment() {
                 "username" to username,
                 "email" to email
             )
-            findNavController().navigate(R.id.action_loginFragment_to_profileFragment, bundle)
+            findNavController().navigate(R.id.action_loginFragment_to_feedFragment, bundle)
         }
     }
 

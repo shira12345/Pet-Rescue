@@ -74,7 +74,7 @@ class ProfileFragment : Fragment() {
             val phone = binding.etPhone.text.toString().trim()
             val animal = binding.etAnimal.text.toString().trim()
             
-            // Save the unique file path
+            // Save the unique file path (or null if deleted)
             val imagePath = internalImageUri?.path
             
             viewModel.updateProfile(email, username, phone, animal, imagePath)
@@ -89,6 +89,24 @@ class ProfileFragment : Fragment() {
         
         binding.fabEditImage.setOnClickListener {
             imagePickerLauncher.launch("image/*")
+        }
+
+        // Handle Delete Image logic
+        binding.fabDeleteImage.setOnClickListener {
+            // 1. Reset local state
+            internalImageUri = null
+            
+            // 2. Clear UI instantly
+            binding.ivProfileImage.setImageResource(R.drawable.logo)
+            
+            // 3. Delete physical file (optional but good practice)
+            currentEmail?.let { email ->
+                val fileName = "profile_${email.hashCode()}.jpg"
+                val file = File(requireContext().filesDir, fileName)
+                if (file.exists()) file.delete()
+            }
+            
+            Toast.makeText(requireContext(), "Click Save to confirm deletion", Toast.LENGTH_SHORT).show()
         }
     }
 

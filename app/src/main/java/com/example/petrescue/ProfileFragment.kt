@@ -1,14 +1,17 @@
 package com.example.petrescue
 
+import android.net.Uri
 import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.petrescue.databinding.FragmentProfileBinding
+import com.squareup.picasso.Picasso
 
 class ProfileFragment : Fragment() {
 
@@ -16,6 +19,14 @@ class ProfileFragment : Fragment() {
     private val binding get() = _binding!!
     
     private val viewModel: AuthViewModel by activityViewModels()
+    private var selectedImageUri: Uri? = null
+
+    private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+        uri?.let {
+            selectedImageUri = it
+            Picasso.get().load(it).into(binding.ivProfileImage)
+        }
+    }
 
     override fun onCreateView(
         inflater: LayoutInflater,
@@ -35,12 +46,18 @@ class ProfileFragment : Fragment() {
         binding.tvUsername.text = passedUsername ?: "---"
         binding.tvEmail.text = passedEmail ?: "---"
 
+        // Load data from database
         viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
             user?.let {
                 binding.tvUsername.text = it.username
                 binding.tvEmail.text = it.email
                 binding.etPhone.setText(it.phoneNumber)
                 binding.etAnimal.setText(it.animal)
+                
+                // Load saved image if exists and no new image is selected
+                if (selectedImageUri == null && !it.profileImage.isNullOrEmpty()) {
+                    Picasso.get().load(Uri.parse(it.profileImage)).into(binding.ivProfileImage)
+                }
             }
         }
 
@@ -49,9 +66,9 @@ class ProfileFragment : Fragment() {
             val username = binding.tvUsername.text.toString()
             val phone = binding.etPhone.text.toString().trim()
             val animal = binding.etAnimal.text.toString().trim()
+            val imagePath = selectedImageUri?.toString()
             
-            // Call the update method in AuthViewModel (ensure it's implemented there)
-            viewModel.updateProfile(email, username, phone, animal)
+            viewModel.updateProfile(email, username, phone, animal, imagePath)
             Toast.makeText(requireContext(), "Profile updated!", Toast.LENGTH_SHORT).show()
         }
 
@@ -62,7 +79,7 @@ class ProfileFragment : Fragment() {
         }
         
         binding.fabEditImage.setOnClickListener {
-            Toast.makeText(requireContext(), "Image upload coming soon", Toast.LENGTH_SHORT).show()
+            imagePickerLauncher.launch("image/*")
         }
     }
 

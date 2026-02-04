@@ -109,14 +109,15 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
-    fun updateProfile(email: String, username: String, phone: String, animal: String) {
+    fun updateProfile(email: String, username: String, phone: String, animal: String, profileImage: String?) {
         viewModelScope.launch {
             val currentUser = userDao.getUserByEmail(email)
             if (currentUser != null) {
                 val updatedUser = currentUser.copy(
                     username = username,
                     phoneNumber = phone,
-                    animal = animal
+                    animal = animal,
+                    profileImage = profileImage ?: currentUser.profileImage
                 )
                 userDao.insertUser(updatedUser)
                 _localUserLiveData.postValue(updatedUser)

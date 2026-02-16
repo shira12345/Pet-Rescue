@@ -1,6 +1,7 @@
 package com.example.petrescue
 
 import android.app.Application
+import android.content.Context
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
@@ -22,6 +23,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     }
     
     private val userDao = AppDatabase.getDatabase(application).userDao()
+    private val prefs = application.getSharedPreferences("pet_rescue_prefs", Context.MODE_PRIVATE)
 
     private val _userLiveData = MutableLiveData<FirebaseUser?>()
     val userLiveData: LiveData<FirebaseUser?> = _userLiveData
@@ -36,7 +38,18 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     val loadingLiveData: LiveData<Boolean> = _loadingLiveData
 
     init {
-        _userLiveData.value = auth?.currentUser
+        val firebaseUser = auth?.currentUser
+        if (firebaseUser != null) {
+            _userLiveData.value = firebaseUser
+        } else {
+            val savedEmail = prefs.getString("current_user_email", null)
+            if (savedEmail != null) {
+                viewModelScope.launch {
+                    val user = userDao.getUserByEmail(savedEmail)
+                    _localUserLiveData.postValue(user)
+                }
+            }
+        }
     }
 
     fun clearError() {
@@ -55,8 +68,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     .addOnCompleteListener { task ->
                         _loadingLiveData.postValue(false)
                         if (task.isSuccessful) {
+                            saveSession(email)
                             _userLiveData.postValue(auth.currentUser)
                         } else if (localUser != null && localUser.password == pass) {
+                            saveSession(email)
                             _localUserLiveData.postValue(localUser)
                         } else {
                             _errorLiveData.postValue("Invalid email or password")
@@ -65,6 +80,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             } else {
                 _loadingLiveData.postValue(false)
                 if (localUser != null && localUser.password == pass) {
+                    saveSession(email)
                     _localUserLiveData.postValue(localUser)
                 } else {
                     _errorLiveData.postValue("Invalid email or password")
@@ -93,6 +109,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                         if (task.isSuccessful) {
                             viewModelScope.launch {
                                 userDao.insertUser(newUser)
+                                saveSession(email)
                                 _loadingLiveData.postValue(false)
                                 _userLiveData.postValue(auth.currentUser)
                             }
@@ -103,6 +120,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                     }
             } else {
                 userDao.insertUser(newUser)
+                saveSession(email)
                 _loadingLiveData.postValue(false)
                 _localUserLiveData.postValue(newUser)
             }
@@ -125,8 +143,17 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         }
     }
 
+    private fun saveSession(email: String) {
+        prefs.edit().putString("current_user_email", email).apply()
+    }
+
+    private fun clearSession() {
+        prefs.edit().remove("current_user_email").apply()
+    }
+
     fun logout() {
         auth?.signOut()
+        clearSession()
         _userLiveData.value = null
         _localUserLiveData.value = null
         clearError()

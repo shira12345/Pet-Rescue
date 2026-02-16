@@ -11,6 +11,8 @@ import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
 import androidx.navigation.fragment.findNavController
 import com.example.petrescue.databinding.FragmentProfileBinding
+import com.squareup.picasso.MemoryPolicy
+import com.squareup.picasso.NetworkPolicy
 import com.squareup.picasso.Picasso
 import java.io.File
 import java.io.FileOutputStream
@@ -19,17 +21,26 @@ class ProfileFragment : Fragment() {
 
     private var _binding: FragmentProfileBinding? = null
     private val binding get() = _binding!!
-    
     private val viewModel: AuthViewModel by activityViewModels()
     private var internalImageUri: Uri? = null
-    private var currentEmail: String? = null
+    private var userEmail: String? = null
 
     private val imagePickerLauncher = registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
         uri?.let {
-            val savedFile = currentEmail?.let { email -> saveImageToInternalStorage(it, email) }
-            if (savedFile != null) {
-                internalImageUri = Uri.fromFile(savedFile)
-                Picasso.get().load(savedFile).into(binding.ivProfileImage)
+            val emailToUse = userEmail ?: arguments?.getString("email") ?: ""
+            if (emailToUse.isNotEmpty()) {
+                val savedFile = saveImageToInternalStorage(it, emailToUse)
+                if (savedFile != null) {
+                    internalImageUri = Uri.fromFile(savedFile)
+                    // Invalidate Picasso cache for this file to ensure the NEW image shows
+                    Picasso.get().invalidate(savedFile)
+                    Picasso.get()
+                        .load(savedFile)
+                        .memoryPolicy(MemoryPolicy.NO_CACHE, MemoryPolicy.NO_STORE)
+                        .into(binding.ivProfileImage)
+                }
+            } else {
+                Toast.makeText(requireContext(), "Error: User not identified", Toast.LENGTH_SHORT).show()
             }
         }
     }
@@ -46,10 +57,9 @@ class ProfileFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         
-        currentEmail = arguments?.getString("email") ?: ""
-        
         viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
             user?.let {
+                userEmail = it.email
                 binding.tvUsername.text = it.username
                 binding.tvEmail.text = it.email
                 binding.etPhone.setText(it.phoneNumber)
@@ -67,11 +77,10 @@ class ProfileFragment : Fragment() {
         }
 
         binding.btnSave.setOnClickListener {
-            val email = binding.tvEmail.text.toString()
+            val email = userEmail ?: binding.tvEmail.text.toString()
             val username = binding.tvUsername.text.toString()
             val phone = binding.etPhone.text.toString().trim()
             val animal = binding.etAnimal.text.toString().trim()
-            
             val imagePath = internalImageUri?.path
             
             viewModel.updateProfile(email, username, phone, animal, imagePath)
@@ -90,13 +99,16 @@ class ProfileFragment : Fragment() {
 
         binding.fabDeleteImage.setOnClickListener {
             internalImageUri = null
-            
             binding.ivProfileImage.setImageResource(R.drawable.logo)
             
-            currentEmail?.let { email ->
+            val emailToDeleteFor = userEmail ?: arguments?.getString("email")
+            emailToDeleteFor?.let { email ->
                 val fileName = "profile_${email.hashCode()}.jpg"
                 val file = File(requireContext().filesDir, fileName)
-                if (file.exists()) file.delete()
+                if (file.exists()) {
+                    Picasso.get().invalidate(file)
+                    file.delete()
+                }
             }
             
             Toast.makeText(requireContext(), "Click Save to confirm deletion", Toast.LENGTH_SHORT).show()

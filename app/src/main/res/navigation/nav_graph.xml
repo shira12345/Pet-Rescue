@@ -49,11 +49,6 @@
         tools:layout="@layout/fragment_post_details" />
 
     <fragment
-        android:id="@+id/postFragment"
-        android:name="com.example.petrescue.PostFragment"
-        android:label="Post" />
-
-    <fragment
         android:id="@+id/profileFragment"
         android:name="com.example.petrescue.ProfileFragment"
         android:label="Profile"

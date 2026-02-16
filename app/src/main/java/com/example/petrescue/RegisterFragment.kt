@@ -88,7 +88,7 @@ class RegisterFragment : Fragment() {
                 "username" to username,
                 "email" to email
             )
-            findNavController().navigate(R.id.action_registerFragment_to_profileFragment, bundle)
+            findNavController().navigate(R.id.action_registerFragment_to_feedFragment, bundle)
         }
     }
 

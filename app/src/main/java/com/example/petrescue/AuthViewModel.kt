@@ -14,7 +14,7 @@ import kotlinx.coroutines.launch
 
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
-  private val auth = try {
+    private val auth = try {
         FirebaseAuth.getInstance() 
     } catch (e: Exception) { 
         Log.e("Error", "Firebase not initialized.", e)
@@ -105,6 +105,22 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 userDao.insertUser(newUser)
                 _loadingLiveData.postValue(false)
                 _localUserLiveData.postValue(newUser)
+            }
+        }
+    }
+
+    fun updateProfile(email: String, username: String, phone: String, animal: String, profileImage: String?) {
+        viewModelScope.launch {
+            val currentUser = userDao.getUserByEmail(email)
+            if (currentUser != null) {
+                val updatedUser = currentUser.copy(
+                    username = username,
+                    phoneNumber = phone,
+                    animal = animal,
+                    profileImage = profileImage ?: currentUser.profileImage
+                )
+                userDao.insertUser(updatedUser)
+                _localUserLiveData.postValue(updatedUser)
             }
         }
     }

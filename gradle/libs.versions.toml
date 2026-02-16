@@ -14,6 +14,7 @@ firebaseBom = "34.8.0"
 fragment = "1.8.9"
 javaJwt = "4.5.0"
 ksp = "2.0.21-1.0.28"
+picasso = "2.71828"
 
 [libraries]
 androidx-core-ktx = { group = "androidx.core", name = "core-ktx", version.ref = "coreKtx" }
@@ -42,6 +43,7 @@ androidx-fragment = { group = "androidx.fragment", name = "fragment-ktx", versio
 firebase-bom = { group = "com.google.firebase", name = "firebase-bom", version.ref = "firebaseBom" }
 firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx", version = "23.2.1" }
 java-jwt = { group = "com.auth0", name = "java-jwt", version.ref = "javaJwt" }
+picasso = { group = "com.squareup.picasso", name = "picasso", version.ref = "picasso" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

@@ -1,3 +1,5 @@
+import java.util.Properties
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.android)
@@ -17,6 +19,11 @@ android {
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    val localProperties = Properties()
+    localProperties.load(project.rootProject.file("local.properties").inputStream())
+    buildConfigField("String", "LOCATION_IQ_KEY", "\"${localProperties.getProperty("LOCATION_IQ_KEY")}\"")
+
   }
 
   buildTypes {
@@ -35,6 +42,7 @@ android {
   buildFeatures {
     compose = true
     viewBinding = true
+    buildConfig = true
   }
 }
 
@@ -60,6 +68,12 @@ dependencies {
   implementation(libs.firebase.auth)
   implementation(libs.java.jwt)
   implementation(libs.picasso)
+  implementation(libs.retrofit.v300)
+  implementation(libs.converter.gson.v290)
+  implementation(libs.kotlinx.coroutines.android.v173)
+  implementation(libs.android.sdk)
+  implementation(libs.play.services.location)
+  implementation(libs.secrets.gradle.plugin)
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)

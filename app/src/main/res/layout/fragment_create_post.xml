@@ -153,8 +153,8 @@
       </com.google.android.material.textfield.TextInputLayout>
 
       <com.google.android.material.textfield.TextInputLayout
-        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:id="@+id/layoutLocation"
+        style="@style/Widget.MaterialComponents.TextInputLayout.OutlinedBox"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:layout_marginTop="12dp"
@@ -204,8 +204,8 @@
           android:id="@+id/buttonSubmit"
           android:layout_width="0dp"
           android:layout_height="56dp"
-          android:layout_weight="1.5"
           android:layout_marginStart="12dp"
+          android:layout_weight="1.5"
           android:text="Post Alert"
           app:cornerRadius="16dp" />
       </LinearLayout>

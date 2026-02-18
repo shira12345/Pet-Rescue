@@ -9,26 +9,26 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.fragment.app.Fragment
-import androidx.navigation.fragment.findNavController
-import com.example.petrescue.databinding.FragmentCreatePostBinding
+import androidx.core.graphics.toColorInt
 import androidx.core.widget.addTextChangedListener
+import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
+import androidx.navigation.fragment.findNavController
+import com.example.petrescue.databinding.FragmentCreatePostBinding
 import com.google.android.material.button.MaterialButton
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 
-class CreatePostFragment : Fragment() {
+const val MINIMUM_DESCRIPTION_LENGTH = 10
 
+class CreatePostFragment : Fragment() {
   private var _binding: FragmentCreatePostBinding? = null
   private val binding get() = _binding!!
 
   private var imageUri: Uri? = null
 
   private val viewModel: CreatePostViewModel by viewModels()
-
-  private val LOCATION_IQ_KEY = "pk.f01f2d98d23143fc44b97e085ce7bda0"
 
   private val pickImage =
     registerForActivityResult(ActivityResultContracts.GetContent()) { uri ->
@@ -51,27 +51,29 @@ class CreatePostFragment : Fragment() {
     super.onViewCreated(view, savedInstanceState)
 
     setupPetTypeDropdown()
+    setupStatusToggle()
     setupListeners()
 
     setupLocationAutocomplete()
   }
 
+  private fun getFirstThreeWords(string: String): String {
+    return string.split(",").take(3).joinToString(",").trim()
+  }
+
   private fun setupLocationAutocomplete() {
-    // 1. Observe the results from ViewModel
     viewModel.results.observe(viewLifecycleOwner) { results ->
       val adapter = ArrayAdapter(
         requireContext(),
         android.R.layout.simple_dropdown_item_1line,
-        results.map { it.displayName }
+        results.map { getFirstThreeWords(it.displayName) }
       )
+
       binding.editLocation.setAdapter(adapter)
 
-      // Show dropdown only if we have results
-      if (results.isNotEmpty() && binding.editLocation.hasFocus()) {
+      if (results.isNotEmpty() && binding.editLocation.hasFocus())
         binding.editLocation.showDropDown()
-      }
 
-      // 2. Handle Item Selection
       binding.editLocation.setOnItemClickListener { _, _, position, _ ->
         val selected = results[position]
         viewModel.selectedLat = selected.lat.toDoubleOrNull()
@@ -82,7 +84,6 @@ class CreatePostFragment : Fragment() {
       }
     }
 
-    // 3. Listen for text changes
     binding.editLocation.addTextChangedListener { text ->
       // Only search if the user is typing (not if we just set the text programmatically)
       if (binding.editLocation.isPerformingCompletion) return@addTextChangedListener
@@ -103,28 +104,35 @@ class CreatePostFragment : Fragment() {
     binding.dropdownPetType.setAdapter(adapter)
   }
 
-  private fun setupListeners() {
+  private fun updateSelectedStatusButton(checkedButtonId: Int) {
+    when (checkedButtonId) {
+      R.id.buttonLost -> {
+        binding.buttonLost.setBackgroundColor("#FFEBEE".toColorInt()) // Light Red
+        binding.buttonLost.setTextColor(Color.RED)
+      }
 
-    binding.toggleStatus.addOnButtonCheckedListener { group, checkedId, isChecked ->
-      if (isChecked) {
-        when (checkedId) {
-          R.id.buttonLost -> {
-            binding.buttonLost.setBackgroundColor(Color.parseColor("#FFEBEE")) // Light Red
-            binding.buttonLost.setTextColor(Color.RED)
-          }
-          R.id.buttonFound -> {
-            binding.buttonFound.setBackgroundColor(Color.parseColor("#E8F5E9")) // Light Green
-            binding.buttonFound.setTextColor(Color.parseColor("#2E7D32"))
-          }
-        }
-      } else {
-        // Reset to default white/gray when unselected
-        val btn = group.findViewById<MaterialButton>(checkedId)
-        btn.setBackgroundColor(Color.TRANSPARENT)
-        btn.setTextColor(Color.GRAY)
+      R.id.buttonFound -> {
+        binding.buttonFound.setBackgroundColor("#E8F5E9".toColorInt()) // Light Green
+        binding.buttonFound.setTextColor("#2E7D32".toColorInt())
       }
     }
+  }
 
+  private fun setupStatusToggle() {
+    updateSelectedStatusButton(binding.toggleStatus.checkedButtonId)
+
+    binding.toggleStatus.addOnButtonCheckedListener { group, checkedId, isChecked ->
+      if (isChecked) return@addOnButtonCheckedListener updateSelectedStatusButton(checkedId)
+
+      // Reset to default white/gray when unselected
+      val button = group.findViewById<MaterialButton>(checkedId)
+
+      button.setBackgroundColor(Color.TRANSPARENT)
+      button.setTextColor(Color.GRAY)
+    }
+  }
+
+  private fun setupListeners() {
     binding.cardPhoto.setOnClickListener {
       pickImage.launch("image/*")
     }
@@ -142,15 +150,25 @@ class CreatePostFragment : Fragment() {
     }
 
     binding.editDescription.addTextChangedListener {
-      if (it!!.length >= 10) binding.editDescription.error = null
+      it?.length?.let { length ->
+        if (length >= MINIMUM_DESCRIPTION_LENGTH) binding.editDescription.error = null
+      }
     }
   }
 
+  private fun getStatusName(): String {
+    val status = when (binding.toggleStatus.checkedButtonId) {
+      binding.buttonLost.id -> binding.buttonLost
+      binding.buttonFound.id -> binding.buttonFound
+      else -> binding.buttonLost
+    }.text.toString().trim()
+
+    return status
+  }
+
   private fun submitPost() {
-    // 1. Validation
     if (!validateInputs()) return
 
-    // 2. Show Loading UI
     binding.loadingOverlay.visibility = View.VISIBLE
 
     // 3. Start Upload (Simulated here)
@@ -159,16 +177,18 @@ class CreatePostFragment : Fragment() {
         // This is where your Firebase Storage + Firestore logic goes
         // val result = viewModel.uploadPost(...)
 
+        val status = getStatusName()
+
         delay(2000) // Simulating network delay
 
         // 4. Success!
         binding.loadingOverlay.visibility = View.GONE
         Toast.makeText(requireContext(), "Post created successfully! 🐾", Toast.LENGTH_LONG).show()
         findNavController().popBackStack()
-
-      } catch (e: Exception) {
+      } catch (exception: Exception) {
         binding.loadingOverlay.visibility = View.GONE
-        Toast.makeText(requireContext(), "Error: ${e.message}", Toast.LENGTH_SHORT).show()
+
+        showError("Error: ${exception.message}")
       }
     }
   }
@@ -179,35 +199,36 @@ class CreatePostFragment : Fragment() {
     val description = binding.editDescription.text.toString().trim()
     val location = binding.editLocation.text.toString().trim()
 
-    // 1. Check if image is picked
     if (imageUri == null) {
       showError("Please add a photo of the pet")
+
       return false
     }
 
-    // 2. Check Pet Type (Dropdown)
     if (petType.isEmpty()) {
       showError("Please select a pet type")
+
       return false
     }
 
-    // 3. Check Pet Name
     if (petName.isEmpty()) {
       binding.editPetName.error = "Name is required"
+
       return false
     }
 
-    // 4. Check Location Selection (Crucial!)
-    // We check if the text is there AND if we have coordinates from the API
     if (location.isEmpty() || viewModel.selectedLat == null) {
       binding.editLocation.error = "Please select a location from the suggestions"
       showError("You must select a location from the dropdown list")
+
       return false
     }
 
-    // 5. Check Description length
-    if (description.length < 10) {
-      binding.editDescription.error = "Please provide more details (at least 10 chars)"
+
+    if (description.length < MINIMUM_DESCRIPTION_LENGTH) {
+      binding.editDescription.error =
+        "Please provide more details (at least $MINIMUM_DESCRIPTION_LENGTH chars)"
+
       return false
     }
 

@@ -13,7 +13,6 @@ import retrofit2.Retrofit
 import retrofit2.converter.gson.GsonConverterFactory
 
 class CreatePostViewModel : ViewModel() {
-
   private val _results = MutableLiveData<List<LocationIQResult>>()
   val results: LiveData<List<LocationIQResult>> = _results
 

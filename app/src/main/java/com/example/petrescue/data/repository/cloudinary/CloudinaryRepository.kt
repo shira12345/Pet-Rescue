@@ -65,7 +65,7 @@ class CloudinaryRepository {
           }
 
           override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {
-            println(bytes / totalBytes)
+            println("Image upload process: $bytes / $totalBytes bytes")
           }
 
           override fun onReschedule(requestId: String?, error: ErrorInfo?) {
@@ -79,13 +79,7 @@ class CloudinaryRepository {
     }
 
   private fun bitmapToFile(image: Bitmap, context: Context): File {
-    println("image")
-    println(image)
-
     val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
-
-    println("file")
-    println(file)
 
     file.outputStream().use {
       image.compress(Bitmap.CompressFormat.JPEG, 100, it)

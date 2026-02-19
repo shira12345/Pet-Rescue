@@ -12,9 +12,9 @@ interface PostDao {
   @Query("SELECT * FROM posts ORDER BY updatedAt DESC")
   fun getAllPosts(): LiveData<MutableList<Post>>
 
-  @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
-  fun insertPosts(vararg posts: Post)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
+  fun insertPosts(posts: List<Post>)
 
-  @Insert(onConflict = OnConflictStrategy.Companion.REPLACE)
+  @Insert(onConflict = OnConflictStrategy.REPLACE)
   fun insertPost(post: Post)
 }

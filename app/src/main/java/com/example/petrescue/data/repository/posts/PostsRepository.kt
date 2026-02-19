@@ -1,75 +1,48 @@
 package com.example.petrescue.data.repository.posts
 
-import android.graphics.Bitmap
-import androidx.lifecycle.LiveData
-import com.example.petrescue.base.MyApplication
-import com.example.petrescue.base.PostCompletion
-import com.example.petrescue.base.StringCompletion
-import com.example.petrescue.dao.AppDatabase
-import com.example.petrescue.data.models.CloudinaryStorageModel
-import com.example.petrescue.data.models.FirebaseModel
 import com.example.petrescue.model.Post
-import java.util.concurrent.Executors
-import kotlin.math.min
+import com.google.firebase.Firebase
+import com.google.firebase.Timestamp
+import com.google.firebase.firestore.FieldValue
+import com.google.firebase.firestore.firestore
+import kotlinx.coroutines.tasks.await
+import java.util.UUID
 
-class PostsRepository private constructor() {
+class PostsRepository {
+  private val db = Firebase.firestore
 
-  private val storageModel = CloudinaryStorageModel()
-  private val firebaseModel = FirebaseModel()
-
-  private val executor = Executors.newSingleThreadExecutor()
-  private val database = AppDatabase.getDatabase(
-    MyApplication.appContext ?: throw IllegalStateException("Context is null")
-  )
-
-  private val posts: LiveData<MutableList<Post>>? = null
-
-  companion object Companion {
-    val shared = PostsRepository()
+  private companion object {
+    const val POSTS = "posts"
   }
 
-  fun getAllPosts(): LiveData<MutableList<Post>> {
-    return posts ?: database.postDao().getAllPosts()
+  suspend fun getAllPosts(since: Long): List<Post> {
+    val snapshot = db.collection(POSTS)
+      .whereGreaterThanOrEqualTo(Post.UPDATED_AT_KEY, Timestamp(since / 1000, 0))
+      .get()
+      .await()
+
+    return snapshot.map { Post.fromJson(it.data) }
   }
 
-  fun refreshPosts() {
-    val lastUpdated = Post.lastUpdated
+  suspend fun updatePost(postId: String, updates: Map<String, Any>): Post? {
+    val postRef = db.collection(POSTS).document(postId)
 
-    firebaseModel.getAllPosts(lastUpdated) {
-      executor.execute {
-        var time = lastUpdated
+    postRef.update(updates + mapOf(Post.UPDATED_AT_KEY to FieldValue.serverTimestamp())).await()
 
-        for (post in it) {
-          database.postDao().insertPosts(post)
-
-          post.updatedAt.let { postLastUpdated ->
-            time = min(time, postLastUpdated)
-          }
-
-          Post.lastUpdated = time
-        }
-      }
-
-    }
+    val snapshot = postRef.get().await()
+    
+    return snapshot.data?.let { Post.fromJson(it) }
   }
 
-  fun createPost(image: Bitmap, post: Post, completion: StringCompletion) {
-    firebaseModel.addPost(post) {
-      storageModel.uploadPostImage(image, post) { imageUri ->
-        if (imageUri.isNullOrEmpty())
-          return@uploadPostImage completion("An error occurred during image upload, please try again")
+  suspend fun createPost(post: Post): Post {
+    val postId = UUID.randomUUID().toString()
+    val postWithId = post.copy(id = postId)
 
-        val postCopy = post.copy(imageUri = imageUri)
-        firebaseModel.addPost(postCopy, completion)
-      }
-    }
-  }
+    db.collection(POSTS)
+      .document(postId)
+      .set(postWithId.toJson)
+      .await()
 
-  fun deletePost(post: Post) {
-    firebaseModel.deletePost(post)
-  }
-
-  fun getPostById(id: String, completion: PostCompletion) {
-    firebaseModel.getPostById(id, completion)
+    return postWithId
   }
 }

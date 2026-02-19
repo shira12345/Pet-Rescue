@@ -56,16 +56,25 @@ class CreatePostFragment : Fragment() {
 
     setupLocationAutocomplete()
 
-//    viewModel.uploadStatus.observe(viewLifecycleOwner) { isSuccess ->
-//      binding?.loadingOverlay?.visibility = View.GONE
-//
-//      if (isSuccess) {
-//        Toast.makeText(requireContext(), "Post created successfully! 🐾", Toast.LENGTH_LONG).show()
-//        findNavController().popBackStack()
-//      } else {
-//        showError("Failed to upload post. Please try again.")
-//      }
-//    }
+    viewModel.createPostState.observe(viewLifecycleOwner) { state ->
+      when (state) {
+        is CreatePostState.Loading -> {
+          binding?.loadingOverlay?.visibility = View.VISIBLE
+        }
+
+        is CreatePostState.Success -> {
+          binding?.loadingOverlay?.visibility = View.GONE
+          dismiss()
+        }
+
+        is CreatePostState.Error -> {
+          binding?.loadingOverlay?.visibility = View.GONE
+          showToast(state.message)
+        }
+
+        else -> {}
+      }
+    }
   }
 
   private fun getFirstThreeWords(string: String): String {
@@ -77,7 +86,7 @@ class CreatePostFragment : Fragment() {
       val adapter = ArrayAdapter(
         requireContext(),
         R.layout.simple_dropdown_item_1line,
-        locations.map { it.displayName }
+        locations.map { getFirstThreeWords(it.displayName) }
       )
 
       binding?.editLocation?.setAdapter(adapter)
@@ -181,8 +190,6 @@ class CreatePostFragment : Fragment() {
   private fun submitPost() {
     if (!validateInputs()) return
 
-    binding?.loadingOverlay?.visibility = View.VISIBLE
-
     // TODO: EXTRACT ALL GET FIELDS TO FUNC!!!
     val petName = binding?.editPetName?.text.toString()
     val petType = binding?.dropdownPetType?.text.toString()
@@ -190,16 +197,10 @@ class CreatePostFragment : Fragment() {
     val description = binding?.editDescription?.text.toString()
     val status = getStatusName()
 
-    val image = binding?.imagePet?.bitmap
+    val imageBitmap = binding?.imagePet?.bitmap
 
-    image?.let { image ->
-      viewModel.createPost(petName, petType, breed, status, description, image) { errorMessage ->
-        binding?.loadingOverlay?.visibility = View.GONE
-
-        if (errorMessage == null) return@createPost dismiss()
-
-        showToast(errorMessage)
-      }
+    imageBitmap?.let { imageBitmap ->
+      viewModel.createPost(petName, petType, breed, status, description, imageBitmap)
     } ?: run {
       showToast("Please upload a pet image")
     }

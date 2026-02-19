@@ -1,4 +1,4 @@
-package com.example.petrescue.LocationAPI
+package com.example.petrescue.data.networking.locationAPI
 
 import com.google.gson.annotations.SerializedName
 

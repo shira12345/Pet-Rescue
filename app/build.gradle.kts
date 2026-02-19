@@ -5,6 +5,7 @@ plugins {
   alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.ksp)
+  alias(libs.plugins.google.services)
 }
 
 android {
@@ -20,10 +21,14 @@ android {
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
 
-    val localProperties = Properties()
-    localProperties.load(project.rootProject.file("local.properties").inputStream())
-    buildConfigField("String", "LOCATION_IQ_KEY", "\"${localProperties.getProperty("LOCATION_IQ_KEY")}\"")
+    val properties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+      properties.load(localPropertiesFile.inputStream())
+    }
 
+    val apiKey = properties.getProperty("LOCATION_IQ_KEY") ?: ""
+    buildConfigField("String", "LOCATION_IQ_KEY", "\"$apiKey\"")
   }
 
   buildTypes {
@@ -63,6 +68,8 @@ dependencies {
   implementation(libs.androidx.fragment)
   implementation(libs.androidx.room.runtime)
   implementation(libs.androidx.room.ktx)
+  implementation(libs.firebase.firestore.ktx)
+  implementation(libs.firebase.storage.ktx)
   ksp(libs.androidx.room.compiler)
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)
@@ -74,6 +81,11 @@ dependencies {
   implementation(libs.android.sdk)
   implementation(libs.play.services.location)
   implementation(libs.secrets.gradle.plugin)
+
+  implementation(libs.cloudinary.android)
+  implementation(libs.cloudinary.android.download)
+  implementation(libs.cloudinary.android.preprocess)
+
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)

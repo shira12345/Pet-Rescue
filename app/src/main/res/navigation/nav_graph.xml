@@ -34,7 +34,7 @@
 
   <fragment
     android:id="@+id/feedFragment"
-    android:name="com.example.petrescue.FeedFragment"
+    android:name="com.example.petrescue.features.posts_feed.FeedFragment"
     android:label="Home"
     tools:layout="@layout/fragment_feed">
     <action

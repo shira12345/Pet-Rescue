@@ -44,7 +44,7 @@ class CloudinaryRepository {
         )
 
       val requestId = MediaManager.get().upload(imageFile.path)
-        .option("folder", "students/${postId}")
+        .option("folder", "posts/${postId}")
         .option("public_id", "pet_image")
         .callback(object : UploadCallback {
           override fun onSuccess(requestId: String, resultData: Map<*, *>) {

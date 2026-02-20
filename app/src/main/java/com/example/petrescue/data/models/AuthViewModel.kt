@@ -77,14 +77,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             if (task.isSuccessful) {
               saveSession(email)
               _userLiveData.postValue(auth.currentUser)
-              // Ensure we have a local user record even if logged in via Firebase
-              viewModelScope.launch {
-                  if (userDao.getUserByEmail(email) == null) {
-                      userDao.insertUser(User(email, email.substringBefore("@"), pass))
-                  }
-                  loadUser(email)
-                  _loadingLiveData.postValue(false)
-              }
+              // Refresh local data after Firebase login succeeds
+              loadUser(email)
+              _loadingLiveData.postValue(false)
             } else if (localUser != null && localUser.password == pass) {
               saveSession(email)
               _localUserLiveData.postValue(localUser)
@@ -127,9 +122,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
               viewModelScope.launch {
                 userDao.insertUser(newUser)
                 saveSession(email)
-                _loadingLiveData.postValue(false)
                 _userLiveData.postValue(auth.currentUser)
                 _localUserLiveData.postValue(newUser)
+                _loadingLiveData.postValue(false)
               }
             } else {
               _loadingLiveData.postValue(false)
@@ -139,8 +134,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
       } else {
         userDao.insertUser(newUser)
         saveSession(email)
-        _loadingLiveData.postValue(false)
         _localUserLiveData.postValue(newUser)
+        _loadingLiveData.postValue(false)
       }
     }
   }
@@ -157,7 +152,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
       try {
         var currentUser = userDao.getUserByEmail(email)
         
-        // Fallback: If user is logged in but record is missing in Room, create a stub
         if (currentUser == null) {
             currentUser = User(email, username, "SOCIAL_LOGIN")
         }

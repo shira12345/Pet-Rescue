@@ -7,9 +7,11 @@ import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.petrescue.dao.AppDatabase
 import com.example.petrescue.data.repository.cloudinary.CloudinaryRepository
+import com.example.petrescue.model.Post
 import com.example.petrescue.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -24,7 +26,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     null
   }
 
-  private val userDao = AppDatabase.Companion.getDatabase(application).userDao()
+  private val database = AppDatabase.Companion.getDatabase(application)
+  private val userDao = database.userDao()
+  private val postDao = database.postDao()
   private val prefs = application.getSharedPreferences("pet_rescue_prefs", Context.MODE_PRIVATE)
   private val cloudinaryRepository = CloudinaryRepository()
 
@@ -33,6 +37,14 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
   private val _localUserLiveData = MutableLiveData<User?>()
   val localUserLiveData: LiveData<User?> = _localUserLiveData
+
+  private val _currentUserEmail = MutableLiveData<String?>()
+  
+  // Reactively fetch user posts whenever the email changes
+  val userPostsLiveData: LiveData<MutableList<Post>> = _currentUserEmail.switchMap { email ->
+      if (email != null) postDao.getPostsByEmail(email)
+      else MutableLiveData(mutableListOf())
+  }
 
   private val _errorLiveData = MutableLiveData<String?>()
   val errorLiveData: LiveData<String?> = _errorLiveData
@@ -46,9 +58,12 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     
     if (firebaseUser != null) {
         _userLiveData.value = firebaseUser
+        // Sync Firebase session to local prefs so CreatePostViewModel can find it
+        saveSession(firebaseUser.email ?: "")
     }
     
     if (savedEmail != null) {
+        _currentUserEmail.value = savedEmail
         loadUser(savedEmail)
     }
   }
@@ -77,12 +92,13 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
             if (task.isSuccessful) {
               saveSession(email)
               _userLiveData.postValue(auth.currentUser)
-              // Refresh local data after Firebase login succeeds
+              _currentUserEmail.value = email
               loadUser(email)
               _loadingLiveData.postValue(false)
             } else if (localUser != null && localUser.password == pass) {
               saveSession(email)
               _localUserLiveData.postValue(localUser)
+              _currentUserEmail.value = email
               _loadingLiveData.postValue(false)
             } else {
               _loadingLiveData.postValue(false)
@@ -94,6 +110,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         if (localUser != null && localUser.password == pass) {
           saveSession(email)
           _localUserLiveData.postValue(localUser)
+          _currentUserEmail.value = email
         } else {
           _errorLiveData.postValue("Invalid email or password")
         }
@@ -122,9 +139,10 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
               viewModelScope.launch {
                 userDao.insertUser(newUser)
                 saveSession(email)
+                _loadingLiveData.postValue(false)
                 _userLiveData.postValue(auth.currentUser)
                 _localUserLiveData.postValue(newUser)
-                _loadingLiveData.postValue(false)
+                _currentUserEmail.value = email
               }
             } else {
               _loadingLiveData.postValue(false)
@@ -135,6 +153,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         userDao.insertUser(newUser)
         saveSession(email)
         _localUserLiveData.postValue(newUser)
+        _currentUserEmail.value = email
         _loadingLiveData.postValue(false)
       }
     }
@@ -151,13 +170,11 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     viewModelScope.launch {
       try {
         var currentUser = userDao.getUserByEmail(email)
-        
         if (currentUser == null) {
             currentUser = User(email, username, "SOCIAL_LOGIN")
         }
 
         var profileImageUrl = currentUser.profileImage
-        
         if (imageBitmap != null) {
           profileImageUrl = cloudinaryRepository.uploadProfileImage(imageBitmap, email)
         }
@@ -202,6 +219,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     clearSession()
     _userLiveData.value = null
     _localUserLiveData.value = null
+    _currentUserEmail.value = null
     clearError()
   }
 }

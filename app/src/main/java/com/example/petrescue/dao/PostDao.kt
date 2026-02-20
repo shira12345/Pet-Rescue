@@ -12,6 +12,10 @@ interface PostDao {
   @Query("SELECT * FROM posts ORDER BY updatedAt DESC")
   fun getAllPosts(): LiveData<MutableList<Post>>
 
+  // Added COLLATE NOCASE to handle email matching regardless of Uppercase/Lowercase
+  @Query("SELECT * FROM posts WHERE creatorEmail = :email COLLATE NOCASE ORDER BY updatedAt DESC")
+  fun getPostsByEmail(email: String): LiveData<MutableList<Post>>
+
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   fun insertPosts(posts: List<Post>)
 

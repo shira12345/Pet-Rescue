@@ -4,6 +4,7 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
@@ -37,8 +38,16 @@ class FeedFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = PostsAdapter { post ->
-            // Navigate to Post Details when a post is clicked
-            findNavController().navigate(R.id.action_feedFragment_to_postDetailsFragment)
+            // Pass post data as arguments during navigation
+            val bundle = bundleOf(
+                "petName" to post.petName,
+                "petType" to post.petType,
+                "breed" to post.breed,
+                "status" to post.status,
+                "description" to post.description,
+                "imageUri" to post.imageUri
+            )
+            findNavController().navigate(R.id.action_feedFragment_to_postDetailsFragment, bundle)
         }
         binding.rvPosts.adapter = adapter
     }

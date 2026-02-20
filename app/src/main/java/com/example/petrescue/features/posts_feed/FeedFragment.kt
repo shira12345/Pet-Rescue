@@ -64,7 +64,8 @@ class FeedFragment : Fragment() {
   private fun setupObservers() {
     viewModel.data.observe(viewLifecycleOwner) { posts ->
       adapter.submitList(posts)
-//      adapter.notifyDataSetChanged()
+      adapter.notifyDataSetChanged()
+      
       binding.swipeRefresh.isRefreshing = false
     }
   }

@@ -32,6 +32,8 @@ class PostDetailsFragment : Fragment() {
         val status = arguments?.getString("status") ?: "Unknown"
         val description = arguments?.getString("description") ?: "No description provided."
         val imageUri = arguments?.getString("imageUri")
+        
+        // Debugging: These might be empty if they weren't saved during creation
         val creatorEmail = arguments?.getString("creatorEmail") ?: ""
         val creatorPhone = arguments?.getString("creatorPhone") ?: ""
 
@@ -47,13 +49,18 @@ class PostDetailsFragment : Fragment() {
         }
 
         binding.btnPostAction.setOnClickListener {
-            // Show real contact info
-            if (creatorPhone.isNotEmpty()) {
-                binding.btnPostAction.text = "Call: $creatorPhone"
-            } else if (creatorEmail.isNotEmpty()) {
-                binding.btnPostAction.text = "Email: $creatorEmail"
-            } else {
-                binding.btnPostAction.text = "No contact info"
+            // Updated logic to show WHATEVER info is available
+            when {
+                !creatorPhone.isNullOrBlank() -> {
+                    binding.btnPostAction.text = "Call: $creatorPhone"
+                }
+                !creatorEmail.isNullOrBlank() -> {
+                    binding.btnPostAction.text = "Email: $creatorEmail"
+                }
+                else -> {
+                    // Fallback if both are empty - helps us debug
+                    binding.btnPostAction.text = "Contact creator via app"
+                }
             }
         }
     }

@@ -64,14 +64,12 @@ class ProfileFragment : Fragment() {
         Post.CREATOR_EMAIL_KEY to post.creatorEmail,
         Post.CREATOR_PHONE_KEY to post.creatorPhone
       )
-      // Corrected navigation action for ProfileFragment
       findNavController().navigate(R.id.action_profileFragment_to_postDetailsFragment, bundle)
     }
     binding.rvMyReports.adapter = postsAdapter
   }
 
   private fun setupObservers() {
-    // 1. Observe profile data
     viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
       user?.let {
         userEmail = it.email
@@ -88,7 +86,6 @@ class ProfileFragment : Fragment() {
       }
     }
 
-    // 2. Observe user's specific posts
     viewModel.userPostsLiveData.observe(viewLifecycleOwner) { posts ->
       postsAdapter.submitList(posts)
       binding.tvNoReports.isVisible = posts.isEmpty()

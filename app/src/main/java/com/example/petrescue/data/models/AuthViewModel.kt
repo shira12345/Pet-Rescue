@@ -40,7 +40,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
   private val _currentUserEmail = MutableLiveData<String?>()
   
-  // Reactively fetch user posts whenever the email changes
   val userPostsLiveData: LiveData<MutableList<Post>> = _currentUserEmail.switchMap { email ->
       if (email != null) postDao.getPostsByEmail(email)
       else MutableLiveData(mutableListOf())
@@ -58,7 +57,6 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     
     if (firebaseUser != null) {
         _userLiveData.value = firebaseUser
-        // Sync Firebase session to local prefs so CreatePostViewModel can find it
         saveSession(firebaseUser.email ?: "")
     }
     

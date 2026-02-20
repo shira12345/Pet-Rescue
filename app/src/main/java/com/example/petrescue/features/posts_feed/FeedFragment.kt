@@ -7,6 +7,7 @@ import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
+import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.petrescue.databinding.FragmentFeedBinding
 import com.example.petrescue.model.Post
 
@@ -32,10 +33,13 @@ class FeedFragment : Fragment() {
 
     setupRecyclerView()
     setupObservers()
-    setupListeners()
   }
 
   private fun setupRecyclerView() {
+    val layout = LinearLayoutManager(context)
+    binding.rvPosts.layoutManager = layout
+    binding.rvPosts.setHasFixedSize(true)
+
     adapter = PostsAdapter(
       onPostClick = { post -> navigateToPostDetailsFragment(post) },
       onEditClick = { post ->
@@ -44,18 +48,24 @@ class FeedFragment : Fragment() {
         findNavController().navigate(action)
       })
 
+    binding.swipeRefresh.setOnRefreshListener {
+      binding.swipeRefresh.isRefreshing = true
+
+      refreshData()
+    }
+
     binding.rvPosts.adapter = adapter
+  }
+
+  private fun refreshData() {
+    viewModel.refreshPosts()
   }
 
   private fun setupObservers() {
     viewModel.data.observe(viewLifecycleOwner) { posts ->
       adapter.submitList(posts)
-    }
-  }
-
-  private fun setupListeners() {
-    binding.btnFeedAction.setOnClickListener {
-      viewModel.refreshPosts()
+//      adapter.notifyDataSetChanged()
+      binding.swipeRefresh.isRefreshing = false
     }
   }
 

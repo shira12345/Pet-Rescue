@@ -1,11 +1,13 @@
 package com.example.petrescue
 
 import android.app.Application
+import android.content.Context
 import android.graphics.Bitmap
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.viewModelScope
+import com.example.petrescue.dao.AppDatabase
 import com.example.petrescue.data.networking.locationAPI.LocationIQResult
 import com.example.petrescue.data.repository.cloudinary.CloudinaryRepository
 import com.example.petrescue.data.repository.location.RemoteLocationRepository
@@ -34,6 +36,8 @@ class CreatePostViewModel(application: Application) : AndroidViewModel(applicati
   private val postsRepository = PostsRepository()
   private val cloudinaryRepository = CloudinaryRepository()
   private val locationRepository = RemoteLocationRepository()
+  private val userDao = AppDatabase.getDatabase(application).userDao()
+  private val prefs = application.getSharedPreferences("pet_rescue_prefs", Context.MODE_PRIVATE)
 
   private var searchJob: Job? = null
 
@@ -75,6 +79,10 @@ class CreatePostViewModel(application: Application) : AndroidViewModel(applicati
 
     viewModelScope.launch {
       try {
+        val savedEmail = prefs.getString("current_user_email", "") ?: ""
+        val currentUser = withContext(Dispatchers.IO) {
+            userDao.getUserByEmail(savedEmail)
+        }
         val post = Post(
           petName = petName,
           petType = petType,
@@ -82,6 +90,8 @@ class CreatePostViewModel(application: Application) : AndroidViewModel(applicati
           status = status,
           description = description,
           imageUri = null,
+          creatorEmail = currentUser?.email ?: savedEmail,
+          creatorPhone = currentUser?.phoneNumber ?: "",
           latitude = latitude,
           longitude = longitude
         )

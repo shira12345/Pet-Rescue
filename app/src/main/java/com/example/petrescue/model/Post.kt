@@ -19,6 +19,8 @@ data class Post(
   val status: String = "Lost",
   val description: String = "",
   val imageUri: String? = "",
+  val creatorEmail: String = "",
+  val creatorPhone: String = "",
   val latitude: Double = 0.0,
   val longitude: Double = 0.0,
   val createdAt: Long = System.currentTimeMillis(),
@@ -46,10 +48,13 @@ data class Post(
     const val STATUS_KEY = "status"
     const val DESCRIPTION_KEY = "description"
     const val IMAGE_URI_KEY = "imageUri"
+    const val CREATOR_EMAIL_KEY = "creatorEmail"
+    const val CREATOR_PHONE_KEY = "creatorPhone"
     const val LATITUDE_KEY = "latitude"
     const val LONGITUDE_KEY = "longitude"
     const val CREATED_AT_KEY = "createdAt"
     const val UPDATED_AT_KEY = "updatedAt"
+
     fun fromJson(json: Map<String, Any?>): Post {
       val id = json[ID_KEY] as? String ?: ""
       val petName = json[PET_NAME_KEY] as? String ?: ""
@@ -58,6 +63,8 @@ data class Post(
       val status = json[STATUS_KEY] as? String ?: "Lost"
       val description = json[DESCRIPTION_KEY] as? String ?: ""
       val imageUri = json[IMAGE_URI_KEY] as? String ?: ""
+      val creatorEmail = json[CREATOR_EMAIL_KEY] as? String ?: ""
+      val creatorPhone = json[CREATOR_PHONE_KEY] as? String ?: ""
       val latitude = (json[LATITUDE_KEY] as? Number)?.toDouble() ?: 0.0
       val longitude = (json[LONGITUDE_KEY] as? Number)?.toDouble() ?: 0.0
 
@@ -66,7 +73,7 @@ data class Post(
 
       val updatedTimestamp = json[UPDATED_AT_KEY] as? Timestamp
       val updatedLong =
-        updatedTimestamp?.toDate()?.time ?: createdLong // Fallback to created if updated is missing
+        updatedTimestamp?.toDate()?.time ?: createdLong
 
       return Post(
         id = id,
@@ -76,6 +83,8 @@ data class Post(
         status = status,
         description = description,
         imageUri = imageUri,
+        creatorEmail = creatorEmail,
+        creatorPhone = creatorPhone,
         latitude = latitude,
         longitude = longitude,
         createdAt = createdLong,
@@ -93,6 +102,8 @@ data class Post(
       STATUS_KEY to status,
       DESCRIPTION_KEY to description,
       IMAGE_URI_KEY to imageUri,
+      CREATOR_EMAIL_KEY to creatorEmail,
+      CREATOR_PHONE_KEY to creatorPhone,
       LATITUDE_KEY to latitude,
       LONGITUDE_KEY to longitude,
       CREATED_AT_KEY to if (createdAt == 0L) FieldValue.serverTimestamp() else Timestamp(

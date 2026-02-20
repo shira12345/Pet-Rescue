@@ -1,5 +1,6 @@
 package com.example.petrescue.data.repository.posts
 
+import android.util.Log
 import androidx.lifecycle.LiveData
 import com.example.petrescue.base.MyApplication
 import com.example.petrescue.base.PostsCompletion
@@ -15,10 +16,15 @@ import java.util.concurrent.Executors
 import kotlin.math.max
 
 class PostsRepository {
-  private val db = Firebase.firestore
+  private val db = try {
+    com.google.firebase.firestore.FirebaseFirestore.getInstance()
+  } catch (e: Exception) {
+    Log.e("PostsRepository", "Firestore not initialized. Using local DB only.", e)
+    null
+  }
 
   private val postDao =
-    AppDatabase.getDatabase(MyApplication.appContext ?: throw Exception("App context is null"))
+    AppDatabase.getDatabase(MyApplication.Globals.appContext ?: throw Exception("App context is null"))
       .postDao()
 
   private val executor = Executors.newSingleThreadExecutor()
@@ -27,13 +33,16 @@ class PostsRepository {
     const val POSTS = "posts"
   }
 
-  private val posts: LiveData<MutableList<Post>>? = null
-
   fun getAllPosts(): LiveData<MutableList<Post>> {
-    return posts ?: postDao.getAllPosts()
+    return postDao.getAllPosts()
   }
 
   fun getPostsFromDB(since: Long, completion: PostsCompletion) {
+    if (db == null) {
+        completion(emptyList())
+        return
+    }
+    
     db.collection(POSTS)
       .whereGreaterThanOrEqualTo(Post.UPDATED_AT_KEY, Timestamp(since / 1000, 0))
       .get()
@@ -66,16 +75,13 @@ class PostsRepository {
   }
 
   suspend fun updatePost(postId: String, updates: Map<String, Any>): Post? {
+    if (db == null) return null
+    
     val postRef = db.collection(POSTS).document(postId)
-
     postRef.update(updates + mapOf(Post.UPDATED_AT_KEY to FieldValue.serverTimestamp())).await()
-
     val snapshot = postRef.get().await()
-
     val updatedPost = snapshot.data?.let { Post.fromJson(it) }
-
     updatedPost?.let { insertPostLocally(it) }
-
     return updatedPost
   }
 
@@ -83,13 +89,14 @@ class PostsRepository {
     val postId = UUID.randomUUID().toString()
     val postWithId = post.copy(id = postId)
 
-    db.collection(POSTS)
-      .document(postId)
-      .set(postWithId.toJson)
-      .await()
+    if (db != null) {
+        db.collection(POSTS)
+          .document(postId)
+          .set(postWithId.toJson)
+          .await()
+    }
 
     insertPostLocally(postWithId)
-
     return postWithId
   }
 }

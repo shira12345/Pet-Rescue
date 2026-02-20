@@ -7,7 +7,7 @@ import androidx.room.RoomDatabase
 import com.example.petrescue.model.Post
 import com.example.petrescue.model.User
 
-@Database(entities = [User::class, Post::class], version = 7)
+@Database(entities = [User::class, Post::class], version = 9)
 abstract class AppDatabase : RoomDatabase() {
   abstract fun userDao(): UserDao
   abstract fun postDao(): PostDao

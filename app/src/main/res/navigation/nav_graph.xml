@@ -49,7 +49,34 @@
     android:id="@+id/postDetailsFragment"
     android:name="com.example.petrescue.PostDetailsFragment"
     android:label="Post Details"
-    tools:layout="@layout/fragment_post_details" />
+    tools:layout="@layout/fragment_post_details">
+    <argument
+      android:name="petName"
+      app:argType="string" />
+    <argument
+      android:name="petType"
+      app:argType="string" />
+    <argument
+      android:name="breed"
+      app:argType="string"
+      app:nullable="true" />
+    <argument
+      android:name="status"
+      app:argType="string" />
+    <argument
+      android:name="description"
+      app:argType="string" />
+    <argument
+      android:name="imageUri"
+      app:argType="string"
+      app:nullable="true" />
+    <argument
+      android:name="creatorEmail"
+      app:argType="string" />
+    <argument
+      android:name="creatorPhone"
+      app:argType="string" />
+  </fragment>
 
   <fragment
     android:id="@+id/profileFragment"

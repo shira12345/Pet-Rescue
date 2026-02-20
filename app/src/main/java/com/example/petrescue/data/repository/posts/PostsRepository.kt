@@ -16,8 +16,6 @@ import java.util.concurrent.Executors
 import kotlin.math.max
 
 class PostsRepository {
-  
-  // Safely initialize Firestore to prevent crash if Firebase isn't configured
   private val db = try {
     com.google.firebase.firestore.FirebaseFirestore.getInstance()
   } catch (e: Exception) {

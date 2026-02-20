@@ -79,13 +79,10 @@ class CreatePostViewModel(application: Application) : AndroidViewModel(applicati
 
     viewModelScope.launch {
       try {
-        // 1. Get current logged-in user details
         val savedEmail = prefs.getString("current_user_email", "") ?: ""
         val currentUser = withContext(Dispatchers.IO) {
             userDao.getUserByEmail(savedEmail)
         }
-
-        // 2. Create the post with real contact info
         val post = Post(
           petName = petName,
           petType = petType,

@@ -38,7 +38,6 @@ class FeedFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = PostsAdapter { post ->
-            // Pass all post data including creator info
             val bundle = bundleOf(
                 "petName" to post.petName,
                 "petType" to post.petType,

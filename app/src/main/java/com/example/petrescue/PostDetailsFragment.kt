@@ -25,7 +25,6 @@ class PostDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Retrieve arguments passed from the Feed
         val petName = arguments?.getString("petName") ?: "Unknown"
         val petType = arguments?.getString("petType") ?: "Unknown"
         val breed = arguments?.getString("breed") ?: ""
@@ -33,11 +32,9 @@ class PostDetailsFragment : Fragment() {
         val description = arguments?.getString("description") ?: "No description provided."
         val imageUri = arguments?.getString("imageUri")
         
-        // Debugging: These might be empty if they weren't saved during creation
         val creatorEmail = arguments?.getString("creatorEmail") ?: ""
         val creatorPhone = arguments?.getString("creatorPhone") ?: ""
 
-        // Display the data
         binding.tvPostTitle.text = "$status $petName"
         binding.tvPostDetailsLine.text = "$petType • $breed"
         binding.tvPostContent.text = description
@@ -49,7 +46,6 @@ class PostDetailsFragment : Fragment() {
         }
 
         binding.btnPostAction.setOnClickListener {
-            // Updated logic to show WHATEVER info is available
             when {
                 !creatorPhone.isNullOrBlank() -> {
                     binding.btnPostAction.text = "Call: $creatorPhone"
@@ -58,7 +54,6 @@ class PostDetailsFragment : Fragment() {
                     binding.btnPostAction.text = "Email: $creatorEmail"
                 }
                 else -> {
-                    // Fallback if both are empty - helps us debug
                     binding.btnPostAction.text = "Contact creator via app"
                 }
             }

@@ -26,7 +26,6 @@ class PostDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        // Retrieve arguments using constants from the Post class
         val petName = arguments?.getString(Post.PET_NAME_KEY) ?: "Unknown"
         val petType = arguments?.getString(Post.PET_TYPE_KEY) ?: "Unknown"
         val breed = arguments?.getString(Post.BREED_KEY) ?: ""
@@ -37,7 +36,6 @@ class PostDetailsFragment : Fragment() {
         val creatorEmail = arguments?.getString(Post.CREATOR_EMAIL_KEY) ?: ""
         val creatorPhone = arguments?.getString(Post.CREATOR_PHONE_KEY) ?: ""
 
-        // Display the data
         binding.tvPostTitle.text = "$status $petName"
         binding.tvPostDetailsLine.text = "$petType • $breed"
         binding.tvPostContent.text = description

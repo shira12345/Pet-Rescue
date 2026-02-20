@@ -70,6 +70,12 @@
       android:name="imageUri"
       app:argType="string"
       app:nullable="true" />
+    <argument
+      android:name="creatorEmail"
+      app:argType="string" />
+    <argument
+      android:name="creatorPhone"
+      app:argType="string" />
   </fragment>
 
   <fragment

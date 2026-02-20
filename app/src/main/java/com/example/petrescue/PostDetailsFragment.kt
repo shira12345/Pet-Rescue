@@ -32,10 +32,12 @@ class PostDetailsFragment : Fragment() {
         val status = arguments?.getString("status") ?: "Unknown"
         val description = arguments?.getString("description") ?: "No description provided."
         val imageUri = arguments?.getString("imageUri")
+        val creatorEmail = arguments?.getString("creatorEmail") ?: ""
+        val creatorPhone = arguments?.getString("creatorPhone") ?: ""
 
         // Display the data
         binding.tvPostTitle.text = "$status $petName"
-        binding.tvPostDetailsLine.text = "$petType • $breed • Just now" // Hardcoded time for now
+        binding.tvPostDetailsLine.text = "$petType • $breed"
         binding.tvPostContent.text = description
 
         if (!imageUri.isNullOrEmpty()) {
@@ -45,7 +47,14 @@ class PostDetailsFragment : Fragment() {
         }
 
         binding.btnPostAction.setOnClickListener {
-            binding.btnPostAction.text = "Call: 050-888-7777"
+            // Show real contact info
+            if (creatorPhone.isNotEmpty()) {
+                binding.btnPostAction.text = "Call: $creatorPhone"
+            } else if (creatorEmail.isNotEmpty()) {
+                binding.btnPostAction.text = "Email: $creatorEmail"
+            } else {
+                binding.btnPostAction.text = "No contact info"
+            }
         }
     }
 

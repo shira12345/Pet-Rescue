@@ -38,14 +38,16 @@ class FeedFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = PostsAdapter { post ->
-            // Pass post data as arguments during navigation
+            // Pass all post data including creator info
             val bundle = bundleOf(
                 "petName" to post.petName,
                 "petType" to post.petType,
                 "breed" to post.breed,
                 "status" to post.status,
                 "description" to post.description,
-                "imageUri" to post.imageUri
+                "imageUri" to post.imageUri,
+                "creatorEmail" to post.creatorEmail,
+                "creatorPhone" to post.creatorPhone
             )
             findNavController().navigate(R.id.action_feedFragment_to_postDetailsFragment, bundle)
         }

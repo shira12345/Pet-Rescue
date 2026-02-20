@@ -11,4 +11,12 @@ interface LocationIQAPI {
     @Query("q") query: String,
     @Query("format") format: String = "json"
   ): Call<List<LocationIQResult>>
+
+  @GET("v1/reverse.php")
+  fun reverseGeocode(
+    @Query("key") apiKey: String,
+    @Query("lat") lat: Double,
+    @Query("lon") lon: Double,
+    @Query("format") format: String = "json"
+  ): Call<LocationIQReverseResult>
 }

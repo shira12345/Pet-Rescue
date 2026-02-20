@@ -41,16 +41,16 @@
       android:id="@+id/action_feedFragment_to_postDetailsFragment"
       app:destination="@id/postDetailsFragment" />
     <action
-      android:id="@+id/action_feedFragment_to_createPostFragment"
-      app:destination="@id/createPostFragment" />
+      android:id="@+id/action_feedFragment_to_postFormFragment"
+      app:destination="@id/postFormFragment" />
   </fragment>
 
   <fragment
     android:id="@+id/postDetailsFragment"
-    android:name="com.example.petrescue.PostDetailsFragment"
+    android:name="com.example.petrescue.features.post_details.PostDetailsFragment"
     android:label="Post Details"
     tools:layout="@layout/fragment_post_details">
-    
+
     <argument
       android:name="post"
       app:argType="com.example.petrescue.model.Post"
@@ -80,12 +80,17 @@
   </fragment>
 
   <fragment
-    android:id="@+id/createPostFragment"
-    android:name="com.example.petrescue.features.create_post.CreatePostFragment"
-    android:label="CreatePostFragment">
+    android:id="@+id/postFormFragment"
+    android:name="com.example.petrescue.features.post_form.PostFormFragment"
+    android:label="PostFormFragment">
     <action
-      android:id="@+id/action_createPostFragment_to_feedFragment"
+      android:id="@+id/action_postFormFragment_to_feedFragment"
       app:destination="@id/feedFragment" />
+    <argument
+      android:name="post"
+      android:defaultValue="@null"
+      app:argType="com.example.petrescue.model.Post"
+      app:nullable="true" />
   </fragment>
 
 </navigation>

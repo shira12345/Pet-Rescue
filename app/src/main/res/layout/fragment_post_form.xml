@@ -17,10 +17,11 @@
       android:padding="20dp">
 
       <TextView
+        android:id="@+id/postFormTitle"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginBottom="16dp"
-        android:text="Create a Rescue Post"
+        android:text="Create Rescue Post"
         android:textColor="#333333"
         android:textSize="24sp"
         android:textStyle="bold" />
@@ -235,6 +236,7 @@
         android:indeterminateTint="@android:color/white" />
 
       <TextView
+        android:id="@+id/loadingOverlayTextView"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
         android:layout_marginTop="16dp"

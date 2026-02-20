@@ -14,6 +14,10 @@ import kotlin.coroutines.resume
 import kotlin.coroutines.resumeWithException
 
 class CloudinaryRepository {
+  companion object {
+    val shared = CloudinaryRepository()
+  }
+
   init {
     // TODO: MOVE TO ENV VARIABLES
     val config = mapOf(

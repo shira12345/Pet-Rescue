@@ -6,30 +6,125 @@
   android:layout_height="match_parent"
   android:background="@color/blue_light">
 
+  <LinearLayout
+    android:id="@+id/searchContainer"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:background="@color/blue_light"
+    android:elevation="4dp"
+    android:orientation="horizontal"
+    android:padding="8dp"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <androidx.appcompat.widget.SearchView
+      android:id="@+id/searchView"
+      android:layout_width="0dp"
+      android:layout_height="wrap_content"
+      android:layout_weight="1"
+      android:background="@android:color/white"
+      app:iconifiedByDefault="false"
+      app:queryHint="Search name or description..." />
+
+    <ImageButton
+      android:id="@+id/btnSort"
+      android:layout_width="48dp"
+      android:layout_height="48dp"
+      android:layout_gravity="center_vertical"
+      android:layout_marginStart="8dp"
+      android:background="?attr/selectableItemBackgroundBorderless"
+      android:contentDescription="Sort by date"
+      android:src="@android:drawable/ic_menu_sort_by_size" />
+  </LinearLayout>
+
+  <HorizontalScrollView
+    android:id="@+id/chipsScrollView"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingHorizontal="8dp"
+    android:scrollbars="none"
+    app:layout_constraintTop_toBottomOf="@id/searchContainer">
+
+    <com.google.android.material.chip.ChipGroup
+      android:id="@+id/chipGroupFilters"
+      android:layout_width="wrap_content"
+      android:layout_height="wrap_content"
+      app:singleSelection="true">
+
+      <com.google.android.material.chip.Chip
+        android:id="@+id/chipDog"
+        style="@style/Widget.MaterialComponents.Chip.Choice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Dogs" />
+
+      <com.google.android.material.chip.Chip
+        android:id="@+id/chipCat"
+        style="@style/Widget.MaterialComponents.Chip.Choice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="Cats" />
+
+      <com.google.android.material.chip.Chip
+        android:id="@+id/chipMyPosts"
+        style="@style/Widget.MaterialComponents.Chip.Choice"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="My Posts" />
+    </com.google.android.material.chip.ChipGroup>
+  </HorizontalScrollView>
+
   <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
     android:id="@+id/swipeRefresh"
     android:layout_width="0dp"
     android:layout_height="0dp"
     app:layout_constraintBottom_toBottomOf="parent"
     app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintHorizontal_bias="0.0"
     app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent"
-    app:layout_constraintVertical_bias="0.0">
+    app:layout_constraintTop_toBottomOf="@id/chipsScrollView">
 
     <androidx.recyclerview.widget.RecyclerView
       android:id="@+id/rvPosts"
-      android:layout_width="0dp"
-      android:layout_height="0dp"
+      android:layout_width="match_parent"
+      android:layout_height="match_parent"
       android:clipToPadding="false"
       android:paddingVertical="8dp"
-      app:layoutManager="androidx.recyclerview.widget.LinearLayoutManager"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent"
       tools:listitem="@layout/item_post" />
-    
   </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+  <com.facebook.shimmer.ShimmerFrameLayout
+    android:id="@+id/shimmerLayout"
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    android:visibility="visible"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/chipsScrollView">
+
+    <LinearLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content"
+      android:orientation="vertical">
+
+      <include layout="@layout/item_post_skeleton" />
+
+      <include layout="@layout/item_post_skeleton" />
+
+      <include layout="@layout/item_post_skeleton" />
+    </LinearLayout>
+  </com.facebook.shimmer.ShimmerFrameLayout>
+
+  <TextView
+    android:id="@+id/tvEmptyState"
+    android:layout_width="wrap_content"
+    android:layout_height="wrap_content"
+    android:text="No posts found matching your criteria"
+    android:textColor="@android:color/darker_gray"
+    android:textSize="16sp"
+    android:visibility="gone"
+    app:layout_constraintBottom_toBottomOf="parent"
+    app:layout_constraintEnd_toEndOf="parent"
+    app:layout_constraintStart_toStartOf="parent"
+    app:layout_constraintTop_toBottomOf="@id/chipsScrollView" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

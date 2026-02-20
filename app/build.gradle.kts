@@ -89,6 +89,7 @@ dependencies {
   implementation(libs.cloudinary.android.preprocess)
 
   implementation(libs.androidx.swiperefreshlayout)
+  implementation(libs.shimmer)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)

@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import androidx.fragment.app.Fragment
 import com.example.petrescue.databinding.FragmentPostDetailsBinding
+import com.example.petrescue.model.Post
 import com.squareup.picasso.Picasso
 
 class PostDetailsFragment : Fragment() {
@@ -25,16 +26,18 @@ class PostDetailsFragment : Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
 
-        val petName = arguments?.getString("petName") ?: "Unknown"
-        val petType = arguments?.getString("petType") ?: "Unknown"
-        val breed = arguments?.getString("breed") ?: ""
-        val status = arguments?.getString("status") ?: "Unknown"
-        val description = arguments?.getString("description") ?: "No description provided."
-        val imageUri = arguments?.getString("imageUri")
+        // Retrieve arguments using constants from the Post class
+        val petName = arguments?.getString(Post.PET_NAME_KEY) ?: "Unknown"
+        val petType = arguments?.getString(Post.PET_TYPE_KEY) ?: "Unknown"
+        val breed = arguments?.getString(Post.BREED_KEY) ?: ""
+        val status = arguments?.getString(Post.STATUS_KEY) ?: "Unknown"
+        val description = arguments?.getString(Post.DESCRIPTION_KEY) ?: "No description provided."
+        val imageUri = arguments?.getString(Post.IMAGE_URI_KEY)
         
-        val creatorEmail = arguments?.getString("creatorEmail") ?: ""
-        val creatorPhone = arguments?.getString("creatorPhone") ?: ""
+        val creatorEmail = arguments?.getString(Post.CREATOR_EMAIL_KEY) ?: ""
+        val creatorPhone = arguments?.getString(Post.CREATOR_PHONE_KEY) ?: ""
 
+        // Display the data
         binding.tvPostTitle.text = "$status $petName"
         binding.tvPostDetailsLine.text = "$petType • $breed"
         binding.tvPostContent.text = description

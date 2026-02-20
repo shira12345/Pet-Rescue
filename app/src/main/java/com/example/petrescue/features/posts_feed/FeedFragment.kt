@@ -4,74 +4,68 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import androidx.core.os.bundleOf
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
 import androidx.navigation.fragment.findNavController
-import com.example.petrescue.R
 import com.example.petrescue.databinding.FragmentFeedBinding
+import com.example.petrescue.model.Post
 
 class FeedFragment : Fragment() {
 
-    private var _binding: FragmentFeedBinding? = null
-    private val binding get() = _binding!!
+  private var _binding: FragmentFeedBinding? = null
+  private val binding get() = _binding!!
 
-    private val viewModel: PostsFeedViewModel by viewModels()
-    private lateinit var adapter: PostsAdapter
+  private val viewModel: PostsFeedViewModel by viewModels()
+  private lateinit var adapter: PostsAdapter
 
-    override fun onCreateView(
-        inflater: LayoutInflater,
-        container: ViewGroup?,
-        savedInstanceState: Bundle?
-    ): View {
-        _binding = FragmentFeedBinding.inflate(inflater, container, false)
-        return binding.root
+  override fun onCreateView(
+    inflater: LayoutInflater,
+    container: ViewGroup?,
+    savedInstanceState: Bundle?
+  ): View {
+    _binding = FragmentFeedBinding.inflate(inflater, container, false)
+    return binding.root
+  }
+
+  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+    super.onViewCreated(view, savedInstanceState)
+
+    setupRecyclerView()
+    setupObservers()
+    setupListeners()
+  }
+
+  private fun setupRecyclerView() {
+    adapter = PostsAdapter({ post -> navigateToPostDetailsFragment(post) })
+    
+    binding.rvPosts.adapter = adapter
+  }
+
+  private fun setupObservers() {
+    viewModel.data.observe(viewLifecycleOwner) { posts ->
+      adapter.submitList(posts)
     }
+  }
 
-    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-        super.onViewCreated(view, savedInstanceState)
-
-        setupRecyclerView()
-        setupObservers()
-        setupListeners()
+  private fun setupListeners() {
+    binding.btnFeedAction.setOnClickListener {
+      viewModel.refreshPosts()
     }
+  }
 
-    private fun setupRecyclerView() {
-        adapter = PostsAdapter { post ->
-            val bundle = bundleOf(
-                "petName" to post.petName,
-                "petType" to post.petType,
-                "breed" to post.breed,
-                "status" to post.status,
-                "description" to post.description,
-                "imageUri" to post.imageUri,
-                "creatorEmail" to post.creatorEmail,
-                "creatorPhone" to post.creatorPhone
-            )
-            findNavController().navigate(R.id.action_feedFragment_to_postDetailsFragment, bundle)
-        }
-        binding.rvPosts.adapter = adapter
-    }
+  override fun onResume() {
+    super.onResume()
+    viewModel.refreshPosts()
+  }
 
-    private fun setupObservers() {
-        viewModel.data.observe(viewLifecycleOwner) { posts ->
-            adapter.submitList(posts)
-        }
-    }
+  override fun onDestroyView() {
+    super.onDestroyView()
+    _binding = null
+  }
 
-    private fun setupListeners() {
-        binding.btnFeedAction.setOnClickListener {
-            viewModel.refreshPosts()
-        }
-    }
+  private fun navigateToPostDetailsFragment(post: Post) {
+    val action = FeedFragmentDirections.actionFeedFragmentToPostDetailsFragment(post)
 
-    override fun onResume() {
-        super.onResume()
-        viewModel.refreshPosts()
-    }
-
-    override fun onDestroyView() {
-        super.onDestroyView()
-        _binding = null
-    }
+    findNavController().navigate(action)
+  }
 }

@@ -1,14 +1,17 @@
 package com.example.petrescue.model
 
 import android.content.Context
+import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.room.Entity
 import androidx.room.PrimaryKey
 import com.example.petrescue.base.MyApplication
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 
+@Parcelize
 @Keep
 @Entity(tableName = "posts")
 data class Post(
@@ -25,7 +28,7 @@ data class Post(
   val longitude: Double = 0.0,
   val createdAt: Long = System.currentTimeMillis(),
   val updatedAt: Long = System.currentTimeMillis()
-) {
+) : Parcelable {
   companion object {
     var lastUpdated: Long
       get() {

@@ -6,6 +6,8 @@ plugins {
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.ksp)
   alias(libs.plugins.google.services)
+  alias(libs.plugins.androidx.navigation.safeargs)
+  id("kotlin-parcelize")
 }
 
 android {
@@ -85,6 +87,8 @@ dependencies {
   implementation(libs.cloudinary.android)
   implementation(libs.cloudinary.android.download)
   implementation(libs.cloudinary.android.preprocess)
+
+  implementation(libs.androidx.swiperefreshlayout)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)

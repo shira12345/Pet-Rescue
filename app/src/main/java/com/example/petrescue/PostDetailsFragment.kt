@@ -14,7 +14,6 @@ class PostDetailsFragment : Fragment() {
     private var _binding: FragmentPostDetailsBinding? = null
     private val binding get() = _binding!!
     
-    // Use Safe Args to retrieve the post object
     private val args: PostDetailsFragmentArgs by navArgs()
 
     override fun onCreateView(
@@ -31,7 +30,6 @@ class PostDetailsFragment : Fragment() {
 
         val post = args.post
 
-        // Display the dynamic data from the post object
         binding.tvPostTitle.text = "${post.status} ${post.petName}"
         binding.tvPostDetailsLine.text = "${post.petType} • ${post.breed ?: "Unknown"}"
         binding.tvPostContent.text = post.description

@@ -71,7 +71,6 @@ dependencies {
   implementation(libs.androidx.room.runtime)
   implementation(libs.androidx.room.ktx)
   
-  // Fixed Firebase dependency names to match libs.versions.toml
   implementation(libs.firebase.firestore)
   implementation(libs.firebase.storage)
   

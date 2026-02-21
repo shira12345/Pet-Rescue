@@ -37,7 +37,6 @@ class FeedFragment : Fragment() {
 
     private fun setupRecyclerView() {
         adapter = PostsAdapter { post ->
-            // Use Safe Args to navigate and pass the entire Post object
             val action = FeedFragmentDirections.actionFeedFragmentToPostDetailsFragment(post)
             findNavController().navigate(action)
         }

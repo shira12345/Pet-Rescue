@@ -169,7 +169,6 @@
             app:layout_constraintStart_toStartOf="parent"
             app:layout_constraintTop_toBottomOf="@id/divider" />
 
-        <!-- Reports Section Container -->
         <androidx.recyclerview.widget.RecyclerView
             android:id="@+id/rvMyReports"
             android:layout_width="0dp"

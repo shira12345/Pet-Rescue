@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8"?>
+<com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  android:layout_width="match_parent"
+  android:layout_height="wrap_content"
+  android:layout_marginHorizontal="16dp"
+  android:layout_marginVertical="8dp"
+  app:cardCornerRadius="12dp"
+  app:cardElevation="0dp">
+
+  <androidx.constraintlayout.widget.ConstraintLayout
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:paddingBottom="16dp">
+
+    <View
+      android:id="@+id/sImage"
+      android:layout_width="match_parent"
+      android:layout_height="200dp"
+      android:background="#DDDDDD"
+      app:layout_constraintTop_toTopOf="parent" />
+
+    <View
+      android:id="@+id/sName"
+      android:layout_width="150dp"
+      android:layout_height="24dp"
+      android:layout_margin="16dp"
+      android:background="#DDDDDD"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/sImage" />
+
+    <View
+      android:id="@+id/sDetails"
+      android:layout_width="100dp"
+      android:layout_height="16dp"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginTop="8dp"
+      android:background="#EEEEEE"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/sName" />
+
+    <View
+      android:id="@+id/sDesc1"
+      android:layout_width="match_parent"
+      android:layout_height="14dp"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginTop="12dp"
+      android:background="#EEEEEE"
+      app:layout_constraintTop_toBottomOf="@id/sDetails" />
+
+    <View
+      android:id="@+id/sDesc2"
+      android:layout_width="200dp"
+      android:layout_height="14dp"
+      android:layout_marginHorizontal="16dp"
+      android:layout_marginTop="6dp"
+      android:background="#EEEEEE"
+      app:layout_constraintStart_toStartOf="parent"
+      app:layout_constraintTop_toBottomOf="@id/sDesc1" />
+
+  </androidx.constraintlayout.widget.ConstraintLayout>
+</com.google.android.material.card.MaterialCardView>

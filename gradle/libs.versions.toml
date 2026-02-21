@@ -28,6 +28,7 @@ ksp = "2.0.21-1.0.28"
 picasso = "2.71828"
 secretsGradlePlugin = "2.0.1"
 googleServices = "4.4.2"
+shimmer = "0.5.0"
 swiperefreshlayout = "1.2.0"
 
 [libraries]
@@ -76,6 +77,7 @@ retrofit-v300 = { module = "com.squareup.retrofit2:retrofit", version.ref = "ret
 secrets-gradle-plugin = { module = "com.google.android.libraries.mapsplatform.secrets-gradle-plugin:secrets-gradle-plugin", version.ref = "secretsGradlePlugin" }
 firebase-firestore-ktx = { group = "com.google.firebase", name = "firebase-firestore-ktx" }
 firebase-storage-ktx = { group = "com.google.firebase", name = "firebase-storage-ktx" }
+shimmer = { module = "com.facebook.shimmer:shimmer", version.ref = "shimmer" }
 
 [plugins]
 android-application = { id = "com.android.application", version.ref = "agp" }

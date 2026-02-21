@@ -1,23 +1,36 @@
+import java.util.Properties
+
 plugins {
   alias(libs.plugins.android.application)
   alias(libs.plugins.kotlin.android)
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.ksp)
   alias(libs.plugins.google.services)
+  alias(libs.plugins.androidx.navigation.safeargs)
+  id("kotlin-parcelize")
 }
 
 android {
   namespace = "com.example.petrescue"
-  compileSdk = 35
+  compileSdk = 36
 
   defaultConfig {
     applicationId = "com.example.petrescue"
     minSdk = 24
-    targetSdk = 35
+    targetSdk = 36
     versionCode = 1
     versionName = "1.0"
 
     testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+
+    val properties = Properties()
+    val localPropertiesFile = project.rootProject.file("local.properties")
+    if (localPropertiesFile.exists()) {
+      properties.load(localPropertiesFile.inputStream())
+    }
+
+    val apiKey = properties.getProperty("LOCATION_IQ_KEY") ?: ""
+    buildConfigField("String", "LOCATION_IQ_KEY", "\"$apiKey\"")
   }
 
   buildTypes {
@@ -36,6 +49,7 @@ android {
   buildFeatures {
     compose = true
     viewBinding = true
+    buildConfig = true
   }
 }
 
@@ -56,10 +70,27 @@ dependencies {
   implementation(libs.androidx.fragment)
   implementation(libs.androidx.room.runtime)
   implementation(libs.androidx.room.ktx)
+  implementation(libs.firebase.firestore.ktx)
+  implementation(libs.firebase.storage.ktx)
   ksp(libs.androidx.room.compiler)
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)
   implementation(libs.java.jwt)
+  implementation(libs.picasso)
+  implementation(libs.retrofit.v300)
+  implementation(libs.converter.gson.v290)
+  implementation(libs.kotlinx.coroutines.android.v173)
+  implementation(libs.android.sdk)
+  implementation(libs.play.services.location)
+  implementation(libs.secrets.gradle.plugin)
+
+  implementation(libs.cloudinary.android)
+  implementation(libs.cloudinary.android.download)
+  implementation(libs.cloudinary.android.preprocess)
+
+  implementation(libs.androidx.swiperefreshlayout)
+  implementation(libs.shimmer)
+
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)
   androidTestImplementation(libs.androidx.espresso.core)

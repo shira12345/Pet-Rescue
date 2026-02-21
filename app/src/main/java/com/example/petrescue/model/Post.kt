@@ -4,6 +4,7 @@ import android.content.Context
 import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.petrescue.base.MyApplication
 import com.google.firebase.Timestamp
@@ -75,8 +76,7 @@ data class Post(
       val createdLong = createdTimestamp?.toDate()?.time ?: System.currentTimeMillis()
 
       val updatedTimestamp = json[UPDATED_AT_KEY] as? Timestamp
-      val updatedLong =
-        updatedTimestamp?.toDate()?.time ?: createdLong
+      val updatedLong = updatedTimestamp?.toDate()?.time ?: createdLong
 
       return Post(
         id = id,
@@ -96,6 +96,7 @@ data class Post(
     }
   }
 
+  @get:Ignore
   val toJson: Map<String, Any?>
     get() = hashMapOf(
       ID_KEY to id,

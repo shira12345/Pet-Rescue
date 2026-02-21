@@ -77,6 +77,12 @@
       app:destination="@id/loginFragment"
       app:popUpTo="@id/nav_graph"
       app:popUpToInclusive="true" />
+    <action
+      android:id="@+id/action_profileFragment_to_postFormFragment"
+      app:destination="@id/postFormFragment" />
+    <action
+      android:id="@+id/action_profileFragment_to_postDetailsFragment"
+      app:destination="@id/postDetailsFragment" />
   </fragment>
 
   <fragment

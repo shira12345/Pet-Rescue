@@ -33,13 +33,13 @@ data class Post(
   companion object {
     var lastUpdated: Long
       get() {
-        return MyApplication.Globals.appContext
+        return MyApplication.appContext
           ?.getSharedPreferences("TAG", Context.MODE_PRIVATE)
           ?.getLong(UPDATED_AT_KEY, 0) ?: 0
       }
       set(value) {
-        MyApplication.Globals.appContext
-          ?.getSharedPreferences("TAG", Context.MODE_PRIVATE)
+        MyApplication.appContext
+          ?.getSharedPreferences("", Context.MODE_PRIVATE)
           ?.edit()
           ?.putLong(UPDATED_AT_KEY, value)
           ?.apply()

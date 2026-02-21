@@ -14,6 +14,10 @@ import com.example.petrescue.databinding.FragmentFeedBinding
 import com.example.petrescue.model.Post
 import com.google.firebase.auth.FirebaseAuth
 
+/**
+ * Fragment that displays a feed of pet rescue posts.
+ * Provides functionality for searching, filtering by type, and sorting posts.
+ */
 class FeedFragment : Fragment() {
   private var _binding: FragmentFeedBinding? = null
   private val binding get() = _binding!!
@@ -42,12 +46,17 @@ class FeedFragment : Fragment() {
     setupObservers()
   }
 
+  /**
+   * Initializes the RecyclerView with its layout manager and custom adapter.
+   */
   private fun setupRecyclerView() {
     val layout = LinearLayoutManager(context)
     binding.rvPosts.layoutManager = layout
     binding.rvPosts.setHasFixedSize(true)
+    val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
 
     adapter = PostsAdapter(
+      currentUserEmail = currentUserEmail,
       onPostClick = { post -> navigateToPostDetailsFragment(post) },
       onEditClick = { post ->
         val action = FeedFragmentDirections.actionFeedFragmentToPostFormFragment(post)
@@ -64,10 +73,16 @@ class FeedFragment : Fragment() {
     binding.rvPosts.adapter = adapter
   }
 
+  /**
+   * Triggers a data refresh in the ViewModel.
+   */
   private fun refreshData() {
     viewModel.refreshPosts()
   }
 
+  /**
+   * Sets up UI listeners for search queries, sort button, and filter chips.
+   */
   private fun setupSearchAndSort() {
     binding.searchView.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
       override fun onQueryTextSubmit(query: String?): Boolean = false
@@ -98,6 +113,9 @@ class FeedFragment : Fragment() {
     }
   }
 
+  /**
+   * Observes the ViewModel's data and updates the UI accordingly.
+   */
   private fun setupObservers() {
     binding.shimmerLayout.startShimmer()
     binding.shimmerLayout.visibility = View.VISIBLE
@@ -116,6 +134,12 @@ class FeedFragment : Fragment() {
     }
   }
 
+  /**
+   * Filters the full list of posts based on search query and selected filters,
+   * then sorts the result before updating the adapter.
+   *
+   * @param query The search string to filter by name or description.
+   */
   private fun filterAndSort(query: String?) {
     val searchText = query?.lowercase() ?: ""
     val currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
@@ -162,6 +186,11 @@ class FeedFragment : Fragment() {
     _binding = null
   }
 
+  /**
+   * Navigates to the Post Details screen.
+   *
+   * @param post The post object to display.
+   */
   private fun navigateToPostDetailsFragment(post: Post) {
     val action = FeedFragmentDirections.actionFeedFragmentToPostDetailsFragment(post)
 

@@ -1,162 +1,130 @@
 package com.example.petrescue.data.models
 
 import android.app.Application
-import android.content.Context
 import android.graphics.Bitmap
-import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.petrescue.dao.AppDatabase
-import com.example.petrescue.data.repository.cloudinary.CloudinaryRepository
+import com.example.petrescue.data.repository.UserRepository
 import com.example.petrescue.model.Post
 import com.example.petrescue.model.User
-import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.launch
 
+/**
+ * ViewModel responsible for managing authentication state and user profile data.
+ * It interacts with the [UserRepository] to perform login, signup, and profile updates.
+ */
 class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
-  private val auth = try {
-    FirebaseAuth.getInstance()
-  } catch (e: Exception) {
-    Log.e("Error", "Firebase not initialized.", e)
-    null
-  }
-
-  private val database = AppDatabase.Companion.getDatabase(application)
-  private val userDao = database.userDao()
-  private val postDao = database.postDao()
-  private val prefs = application.getSharedPreferences("pet_rescue_prefs", Context.MODE_PRIVATE)
-  private val cloudinaryRepository = CloudinaryRepository()
+  private val userRepository = UserRepository(application)
+  private val postDao = AppDatabase.getDatabase(application).postDao()
 
   private val _userLiveData = MutableLiveData<FirebaseUser?>()
+  /** Observable Firebase user state. */
   val userLiveData: LiveData<FirebaseUser?> = _userLiveData
 
-  private val _localUserLiveData = MutableLiveData<User?>()
-  val localUserLiveData: LiveData<User?> = _localUserLiveData
-
   private val _currentUserEmail = MutableLiveData<String?>()
-  
+
+  /** Observable local user profile data, automatically updated based on the current user's email. */
+  val localUserLiveData: LiveData<User?> = _currentUserEmail.switchMap { email ->
+    if (email != null) userRepository.getLocalUser(email)
+    else MutableLiveData(null)
+  }
+
+  /** Observable list of posts created by the current user. */
   val userPostsLiveData: LiveData<MutableList<Post>> = _currentUserEmail.switchMap { email ->
-      if (email != null) postDao.getPostsByEmail(email)
-      else MutableLiveData(mutableListOf())
+    if (email != null) postDao.getPostsByEmail(email)
+    else MutableLiveData(mutableListOf())
   }
 
   private val _errorLiveData = MutableLiveData<String?>()
+  /** Observable error messages for UI display. */
   val errorLiveData: LiveData<String?> = _errorLiveData
 
   private val _loadingLiveData = MutableLiveData<Boolean>()
+  /** Observable loading state for UI progress indicators. */
   val loadingLiveData: LiveData<Boolean> = _loadingLiveData
 
   init {
-    val firebaseUser = auth?.currentUser
-    val savedEmail = firebaseUser?.email ?: prefs.getString("current_user_email", null)
-    
-    if (firebaseUser != null) {
-        _userLiveData.value = firebaseUser
-        saveSession(firebaseUser.email ?: "")
-    }
-    
+    val firebaseUser = userRepository.currentUser
+    val savedEmail = firebaseUser?.email ?: userRepository.getSavedEmail()
+
+    if (firebaseUser != null) _userLiveData.value = firebaseUser
+
     if (savedEmail != null) {
-        _currentUserEmail.value = savedEmail
-        loadUser(savedEmail)
+      _currentUserEmail.value = savedEmail
     }
   }
 
-  fun loadUser(email: String) {
-    viewModelScope.launch {
-      val user = userDao.getUserByEmail(email)
-      _localUserLiveData.postValue(user)
-    }
-  }
-
+  /**
+   * Resets the current error state.
+   */
   fun clearError() {
     _errorLiveData.value = null
   }
 
+  /**
+   * Attempts to log in a user with the provided credentials.
+   *
+   * @param email The user's email address.
+   * @param pass The user's password.
+   */
   fun login(email: String, pass: String) {
     clearError()
     _loadingLiveData.value = true
 
     viewModelScope.launch {
-      val localUser = userDao.getUserByEmail(email)
+      val result = userRepository.login(email, pass)
 
-      if (auth != null && auth.app.options.apiKey != "API_KEY") {
-        auth.signInWithEmailAndPassword(email, pass)
-          .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-              saveSession(email)
-              _userLiveData.postValue(auth.currentUser)
-              _currentUserEmail.value = email
-              loadUser(email)
-              _loadingLiveData.postValue(false)
-            } else if (localUser != null && localUser.password == pass) {
-              saveSession(email)
-              _localUserLiveData.postValue(localUser)
-              _currentUserEmail.value = email
-              _loadingLiveData.postValue(false)
-            } else {
-              _loadingLiveData.postValue(false)
-              _errorLiveData.postValue("Invalid email or password")
-            }
-          }
-      } else {
-        _loadingLiveData.postValue(false)
-        if (localUser != null && localUser.password == pass) {
-          saveSession(email)
-          _localUserLiveData.postValue(localUser)
-          _currentUserEmail.value = email
-        } else {
-          _errorLiveData.postValue("Invalid email or password")
-        }
+      result.onSuccess { firebaseUser ->
+        _userLiveData.postValue(firebaseUser)
+        _currentUserEmail.postValue(email)
+      }.onFailure {
+        _errorLiveData.postValue(it.message ?: "Invalid email or password")
       }
+
+      _loadingLiveData.postValue(false)
     }
   }
 
+  /**
+   * Attempts to register a new user account.
+   *
+   * @param username The display name for the new user.
+   * @param email The user's email address.
+   * @param pass The user's password.
+   */
   fun signUp(username: String, email: String, pass: String) {
     clearError()
     _loadingLiveData.value = true
 
     viewModelScope.launch {
-      val existingUser = userDao.getUserByEmail(email)
-      if (existingUser != null) {
-        _loadingLiveData.postValue(false)
-        _errorLiveData.postValue("An account with this email already exists.")
-        return@launch
+      val result = userRepository.signUp(username, email, pass)
+
+      result.onSuccess { user ->
+        _currentUserEmail.postValue(email)
+        _userLiveData.postValue(userRepository.currentUser)
+      }.onFailure {
+        _errorLiveData.postValue(it.message ?: "Registration failed")
       }
 
-      val newUser = User(email, username, pass)
-
-      if (auth != null && auth.app.options.apiKey != "API_KEY") {
-        auth.createUserWithEmailAndPassword(email, pass)
-          .addOnCompleteListener { task ->
-            if (task.isSuccessful) {
-              viewModelScope.launch {
-                userDao.insertUser(newUser)
-                saveSession(email)
-                _loadingLiveData.postValue(false)
-                _userLiveData.postValue(auth.currentUser)
-                _localUserLiveData.postValue(newUser)
-                _currentUserEmail.value = email
-              }
-            } else {
-              _loadingLiveData.postValue(false)
-              _errorLiveData.postValue(task.exception?.message ?: "Registration failed")
-            }
-          }
-      } else {
-        userDao.insertUser(newUser)
-        saveSession(email)
-        _localUserLiveData.postValue(newUser)
-        _currentUserEmail.value = email
-        _loadingLiveData.postValue(false)
-      }
+      _loadingLiveData.postValue(false)
     }
   }
 
+  /**
+   * Updates the current user's profile details.
+   *
+   * @param email The user's email (used as identifier).
+   * @param username The updated username.
+   * @param phone The updated phone number.
+   * @param animal The updated animal preference/type.
+   * @param imageBitmap Optional new profile image bitmap.
+   */
   fun updateProfile(
     email: String,
     username: String,
@@ -165,59 +133,36 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     imageBitmap: Bitmap?
   ) {
     _loadingLiveData.value = true
+
     viewModelScope.launch {
-      try {
-        var currentUser = userDao.getUserByEmail(email)
-        if (currentUser == null) {
-            currentUser = User(email, username, "SOCIAL_LOGIN")
-        }
+      val result = userRepository.updateProfile(email, username, phone, animal, imageBitmap)
 
-        var profileImageUrl = currentUser.profileImage
-        if (imageBitmap != null) {
-          profileImageUrl = cloudinaryRepository.uploadProfileImage(imageBitmap, email)
-        }
+      result.onFailure { _errorLiveData.postValue(it.message ?: "Failed to update profile") }
 
-        val updatedUser = currentUser.copy(
-          username = username,
-          phoneNumber = phone,
-          animal = animal,
-          profileImage = profileImageUrl
-        )
-        userDao.insertUser(updatedUser)
-        _localUserLiveData.postValue(updatedUser)
-        _loadingLiveData.postValue(false)
-      } catch (e: Exception) {
-        _errorLiveData.postValue(e.message ?: "Failed to update profile")
-        _loadingLiveData.postValue(false)
-      }
+      _loadingLiveData.postValue(false)
     }
   }
 
+  /**
+   * Deletes the current user's profile image.
+   *
+   * @param email The email address of the user.
+   */
   fun deleteProfileImage(email: String) {
     viewModelScope.launch {
-      val currentUser = userDao.getUserByEmail(email)
-      if (currentUser != null) {
-        val updatedUser = currentUser.copy(profileImage = null)
-        userDao.insertUser(updatedUser)
-        _localUserLiveData.postValue(updatedUser)
-      }
+      userRepository.deleteProfileImage(email)
     }
   }
 
-  private fun saveSession(email: String) {
-    prefs.edit().putString("current_user_email", email).apply()
-  }
-
-  private fun clearSession() {
-    prefs.edit().remove("current_user_email").apply()
-  }
-
+  /**
+   * Performs logout by clearing both remote and local session states.
+   */
   fun logout() {
-    auth?.signOut()
-    clearSession()
+    userRepository.logout()
+    
     _userLiveData.value = null
-    _localUserLiveData.value = null
     _currentUserEmail.value = null
+
     clearError()
   }
 }

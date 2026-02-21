@@ -60,19 +60,41 @@
                 android:textStyle="bold" />
         </com.google.android.material.card.MaterialCardView>
 
-        <com.google.android.material.button.MaterialButton
-            android:id="@+id/btnEdit"
-            style="@style/Widget.Material3.Button.TonalButton"
+        <LinearLayout
+            android:id="@+id/llActions"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_margin="12dp"
-            android:minHeight="32dp"
-            android:text="Edit"
-            android:textSize="12sp"
-            android:visibility="gone"
+            android:layout_margin="8dp"
+            android:orientation="horizontal"
             app:layout_constraintEnd_toEndOf="parent"
-            app:layout_constraintTop_toTopOf="parent"
-            tools:visibility="visible" />
+            app:layout_constraintTop_toTopOf="parent">
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnEdit"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_marginEnd="4dp"
+                android:minHeight="32dp"
+                android:text="Edit"
+                android:textSize="12sp"
+                android:visibility="gone"
+                tools:visibility="visible" />
+
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnDelete"
+                style="@style/Widget.Material3.Button.TonalButton"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:minHeight="32dp"
+                android:text="Delete"
+                android:textColor="?attr/colorError"
+                android:textSize="12sp"
+                android:visibility="gone"
+                app:icon="@android:drawable/ic_menu_delete"
+                app:iconTint="?attr/colorError"
+                tools:visibility="visible" />
+        </LinearLayout>
 
         <LinearLayout
             android:layout_width="match_parent"

@@ -2,6 +2,7 @@ package com.example.petrescue.dao
 
 import androidx.lifecycle.LiveData
 import androidx.room.Dao
+import androidx.room.Delete
 import androidx.room.Insert
 import androidx.room.OnConflictStrategy
 import androidx.room.Query
@@ -46,4 +47,12 @@ interface PostDao {
    */
   @Insert(onConflict = OnConflictStrategy.REPLACE)
   fun insertPost(post: Post)
+
+  /**
+   * Deletes a post from the local database.
+   *
+   * @param post The post to delete.
+   */
+  @Delete
+  suspend fun deletePost(post: Post)
 }

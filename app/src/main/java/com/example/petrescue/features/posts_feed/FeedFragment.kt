@@ -4,15 +4,19 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.Toast
 import androidx.appcompat.widget.SearchView
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.viewModels
+import androidx.lifecycle.lifecycleScope
 import androidx.navigation.fragment.findNavController
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.example.petrescue.R
+import com.example.petrescue.data.repository.posts.PostsRepository
 import com.example.petrescue.databinding.FragmentFeedBinding
 import com.example.petrescue.model.Post
 import com.google.firebase.auth.FirebaseAuth
+import kotlinx.coroutines.launch
 
 /**
  * Fragment that displays a feed of pet rescue posts.
@@ -60,17 +64,26 @@ class FeedFragment : Fragment() {
       onPostClick = { post -> navigateToPostDetailsFragment(post) },
       onEditClick = { post ->
         val action = FeedFragmentDirections.actionFeedFragmentToPostFormFragment(post)
-
         findNavController().navigate(action)
-      })
+      },
+      onDeleteClick = { post ->
+        deletePost(post)
+      }
+    )
 
     binding.swipeRefresh.setOnRefreshListener {
       binding.swipeRefresh.isRefreshing = true
-
       refreshData()
     }
 
     binding.rvPosts.adapter = adapter
+  }
+
+  private fun deletePost(post: Post) {
+    viewLifecycleOwner.lifecycleScope.launch {
+      PostsRepository.shared.deletePost(post)
+      Toast.makeText(requireContext(), "Post deleted", Toast.LENGTH_SHORT).show()
+    }
   }
 
   /**

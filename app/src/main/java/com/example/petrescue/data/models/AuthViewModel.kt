@@ -2,12 +2,16 @@ package com.example.petrescue.data.models
 
 import android.app.Application
 import android.content.Context
+import android.graphics.Bitmap
 import android.util.Log
 import androidx.lifecycle.AndroidViewModel
 import androidx.lifecycle.LiveData
 import androidx.lifecycle.MutableLiveData
+import androidx.lifecycle.switchMap
 import androidx.lifecycle.viewModelScope
 import com.example.petrescue.dao.AppDatabase
+import com.example.petrescue.data.repository.cloudinary.CloudinaryRepository
+import com.example.petrescue.model.Post
 import com.example.petrescue.model.User
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.auth.FirebaseUser
@@ -22,14 +26,24 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     null
   }
 
-  private val userDao = AppDatabase.Companion.getDatabase(application).userDao()
+  private val database = AppDatabase.Companion.getDatabase(application)
+  private val userDao = database.userDao()
+  private val postDao = database.postDao()
   private val prefs = application.getSharedPreferences("pet_rescue_prefs", Context.MODE_PRIVATE)
+  private val cloudinaryRepository = CloudinaryRepository()
 
   private val _userLiveData = MutableLiveData<FirebaseUser?>()
   val userLiveData: LiveData<FirebaseUser?> = _userLiveData
 
   private val _localUserLiveData = MutableLiveData<User?>()
   val localUserLiveData: LiveData<User?> = _localUserLiveData
+
+  private val _currentUserEmail = MutableLiveData<String?>()
+  
+  val userPostsLiveData: LiveData<MutableList<Post>> = _currentUserEmail.switchMap { email ->
+      if (email != null) postDao.getPostsByEmail(email)
+      else MutableLiveData(mutableListOf())
+  }
 
   private val _errorLiveData = MutableLiveData<String?>()
   val errorLiveData: LiveData<String?> = _errorLiveData
@@ -39,16 +53,23 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
 
   init {
     val firebaseUser = auth?.currentUser
+    val savedEmail = firebaseUser?.email ?: prefs.getString("current_user_email", null)
+    
     if (firebaseUser != null) {
-      _userLiveData.value = firebaseUser
-    } else {
-      val savedEmail = prefs.getString("current_user_email", null)
-      if (savedEmail != null) {
-        viewModelScope.launch {
-          val user = userDao.getUserByEmail(savedEmail)
-          _localUserLiveData.postValue(user)
-        }
-      }
+        _userLiveData.value = firebaseUser
+        saveSession(firebaseUser.email ?: "")
+    }
+    
+    if (savedEmail != null) {
+        _currentUserEmail.value = savedEmail
+        loadUser(savedEmail)
+    }
+  }
+
+  fun loadUser(email: String) {
+    viewModelScope.launch {
+      val user = userDao.getUserByEmail(email)
+      _localUserLiveData.postValue(user)
     }
   }
 
@@ -66,14 +87,19 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
       if (auth != null && auth.app.options.apiKey != "API_KEY") {
         auth.signInWithEmailAndPassword(email, pass)
           .addOnCompleteListener { task ->
-            _loadingLiveData.postValue(false)
             if (task.isSuccessful) {
               saveSession(email)
               _userLiveData.postValue(auth.currentUser)
+              _currentUserEmail.value = email
+              loadUser(email)
+              _loadingLiveData.postValue(false)
             } else if (localUser != null && localUser.password == pass) {
               saveSession(email)
               _localUserLiveData.postValue(localUser)
+              _currentUserEmail.value = email
+              _loadingLiveData.postValue(false)
             } else {
+              _loadingLiveData.postValue(false)
               _errorLiveData.postValue("Invalid email or password")
             }
           }
@@ -82,6 +108,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
         if (localUser != null && localUser.password == pass) {
           saveSession(email)
           _localUserLiveData.postValue(localUser)
+          _currentUserEmail.value = email
         } else {
           _errorLiveData.postValue("Invalid email or password")
         }
@@ -112,6 +139,8 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
                 saveSession(email)
                 _loadingLiveData.postValue(false)
                 _userLiveData.postValue(auth.currentUser)
+                _localUserLiveData.postValue(newUser)
+                _currentUserEmail.value = email
               }
             } else {
               _loadingLiveData.postValue(false)
@@ -121,8 +150,9 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
       } else {
         userDao.insertUser(newUser)
         saveSession(email)
-        _loadingLiveData.postValue(false)
         _localUserLiveData.postValue(newUser)
+        _currentUserEmail.value = email
+        _loadingLiveData.postValue(false)
       }
     }
   }
@@ -132,17 +162,42 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     username: String,
     phone: String,
     animal: String,
-    profileImage: String?
+    imageBitmap: Bitmap?
   ) {
+    _loadingLiveData.value = true
     viewModelScope.launch {
-      val currentUser = userDao.getUserByEmail(email)
-      if (currentUser != null) {
+      try {
+        var currentUser = userDao.getUserByEmail(email)
+        if (currentUser == null) {
+            currentUser = User(email, username, "SOCIAL_LOGIN")
+        }
+
+        var profileImageUrl = currentUser.profileImage
+        if (imageBitmap != null) {
+          profileImageUrl = cloudinaryRepository.uploadProfileImage(imageBitmap, email)
+        }
+
         val updatedUser = currentUser.copy(
           username = username,
           phoneNumber = phone,
           animal = animal,
-          profileImage = profileImage ?: currentUser.profileImage
+          profileImage = profileImageUrl
         )
+        userDao.insertUser(updatedUser)
+        _localUserLiveData.postValue(updatedUser)
+        _loadingLiveData.postValue(false)
+      } catch (e: Exception) {
+        _errorLiveData.postValue(e.message ?: "Failed to update profile")
+        _loadingLiveData.postValue(false)
+      }
+    }
+  }
+
+  fun deleteProfileImage(email: String) {
+    viewModelScope.launch {
+      val currentUser = userDao.getUserByEmail(email)
+      if (currentUser != null) {
+        val updatedUser = currentUser.copy(profileImage = null)
         userDao.insertUser(updatedUser)
         _localUserLiveData.postValue(updatedUser)
       }
@@ -162,6 +217,7 @@ class AuthViewModel(application: Application) : AndroidViewModel(application) {
     clearSession()
     _userLiveData.value = null
     _localUserLiveData.value = null
+    _currentUserEmail.value = null
     clearError()
   }
 }

@@ -51,31 +51,8 @@
     android:label="Post Details"
     tools:layout="@layout/fragment_post_details">
     <argument
-      android:name="petName"
-      app:argType="string" />
-    <argument
-      android:name="petType"
-      app:argType="string" />
-    <argument
-      android:name="breed"
-      app:argType="string"
-      app:nullable="true" />
-    <argument
-      android:name="status"
-      app:argType="string" />
-    <argument
-      android:name="description"
-      app:argType="string" />
-    <argument
-      android:name="imageUri"
-      app:argType="string"
-      app:nullable="true" />
-    <argument
-      android:name="creatorEmail"
-      app:argType="string" />
-    <argument
-      android:name="creatorPhone"
-      app:argType="string" />
+      android:name="post"
+      app:argType="com.example.petrescue.model.Post" />
   </fragment>
 
   <fragment
@@ -98,6 +75,9 @@
       app:destination="@id/loginFragment"
       app:popUpTo="@id/nav_graph"
       app:popUpToInclusive="true" />
+    <action
+      android:id="@+id/action_profileFragment_to_postDetailsFragment"
+      app:destination="@id/postDetailsFragment" />
   </fragment>
 
   <fragment

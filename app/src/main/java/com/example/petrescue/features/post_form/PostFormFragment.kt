@@ -153,7 +153,7 @@ class PostFormFragment : Fragment() {
   }
 
   private fun setupPetTypeDropdown() {
-    val types = listOf("Dog", "Cat", "Bird", "Other")
+    val types = listOf(Post.TYPE_DOG, Post.TYPE_CAT, Post.TYPE_BIRD, Post.TYPE_OTHER)
 
     val adapter = ArrayAdapter(
       requireContext(),

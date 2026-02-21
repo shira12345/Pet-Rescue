@@ -103,8 +103,8 @@ class FeedFragment : Fragment() {
 
     binding.chipGroupFilters.setOnCheckedChangeListener { group, checkedId ->
       selectedTypeFilter = when (checkedId) {
-        R.id.chipDog -> "Dog"
-        R.id.chipCat -> "Cat"
+        R.id.chipDog -> Post.TYPE_DOG
+        R.id.chipCat -> Post.TYPE_CAT
         R.id.chipMyPosts -> "Mine"
         else -> null
       }
@@ -153,8 +153,8 @@ class FeedFragment : Fragment() {
       }
 
     filteredList = when (selectedTypeFilter) {
-      "Dog" -> filteredList.filter { it.petType.equals("Dog", ignoreCase = true) }
-      "Cat" -> filteredList.filter { it.petType.equals("Cat", ignoreCase = true) }
+      Post.TYPE_DOG -> filteredList.filter { it.petType.equals(Post.TYPE_DOG, ignoreCase = true) }
+      Post.TYPE_CAT -> filteredList.filter { it.petType.equals(Post.TYPE_CAT, ignoreCase = true) }
       "Mine" -> filteredList.filter { it.creatorEmail == currentUserEmail }
       else -> filteredList
     }

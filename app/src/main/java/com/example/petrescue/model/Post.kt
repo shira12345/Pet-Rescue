@@ -49,6 +49,12 @@ data class Post(
   val updatedAt: Long = System.currentTimeMillis()
 ) : Parcelable {
   companion object {
+    /** Constants for pet types to ensure consistency across the app. */
+    const val TYPE_DOG = "Dog"
+    const val TYPE_CAT = "Cat"
+    const val TYPE_BIRD = "Bird"
+    const val TYPE_OTHER = "Other"
+
     /**
      * Globally tracks the last time any post was updated, used for delta-sync with remote DB.
      * Persisted in SharedPreferences.

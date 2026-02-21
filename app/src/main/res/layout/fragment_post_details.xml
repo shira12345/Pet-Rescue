@@ -1,98 +1,120 @@
 <?xml version="1.0" encoding="utf-8"?>
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-    xmlns:app="http://schemas.android.com/apk/res-auto"
-    xmlns:tools="http://schemas.android.com/tools"
-    android:layout_width="match_parent"
-    android:layout_height="match_parent"
-    android:background="@color/blue_light">
+  xmlns:app="http://schemas.android.com/apk/res-auto"
+  xmlns:tools="http://schemas.android.com/tools"
+  android:layout_width="match_parent"
+  android:layout_height="match_parent"
+  android:background="@color/blue_light">
 
-    <ScrollView
+  <ScrollView
+    android:layout_width="match_parent"
+    android:layout_height="0dp"
+    app:layout_constraintBottom_toTopOf="@id/btnPostAction"
+    app:layout_constraintTop_toTopOf="parent">
+
+    <androidx.constraintlayout.widget.ConstraintLayout
+      android:layout_width="match_parent"
+      android:layout_height="wrap_content">
+
+      <ImageView
+        android:id="@+id/ivPostImage"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
-        app:layout_constraintBottom_toTopOf="@id/btnPostAction"
-        app:layout_constraintTop_toTopOf="parent">
+        android:layout_height="300dp"
+        android:scaleType="centerCrop"
+        android:src="@drawable/logo"
+        app:layout_constraintTop_toTopOf="parent" />
+
+      <com.google.android.material.card.MaterialCardView
+        android:id="@+id/cardPostInfo"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_margin="16dp"
+        app:cardCornerRadius="12dp"
+        app:cardElevation="4dp"
+        app:layout_constraintTop_toBottomOf="@id/ivPostImage">
 
         <androidx.constraintlayout.widget.ConstraintLayout
+          android:layout_width="match_parent"
+          android:layout_height="wrap_content"
+          android:padding="16dp">
+
+          <TextView
+            android:id="@+id/tvPostTitle"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:textColor="@color/logo_teal"
+            android:textSize="22sp"
+            android:textStyle="bold"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:text="Lost Buddy" />
+
+          <TextView
+            android:id="@+id/tvPostDetailsLine"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/text_hint"
+            android:textSize="14sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPostTitle"
+            tools:text="Dog • Golden Retriever" />
+
+          <TextView
+            android:id="@+id/tvLocation"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="4dp"
+            android:textColor="@color/text_hint"
+            android:textSize="12sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPostDetailsLine"
+            tools:text="Location: 32.08, 34.78" />
+
+          <View
+            android:id="@+id/detailsDivider"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content">
+            android:layout_height="1dp"
+            android:layout_marginTop="12dp"
+            android:background="#DDDDDD"
+            app:layout_constraintTop_toBottomOf="@id/tvLocation" />
 
-            <ImageView
-                android:id="@+id/ivPostImage"
-                android:layout_width="match_parent"
-                android:layout_height="300dp"
-                android:scaleType="centerCrop"
-                android:src="@drawable/logo"
-                app:layout_constraintTop_toTopOf="parent" />
+          <TextView
+            android:id="@+id/tvPostContent"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="12dp"
+            android:textColor="@color/black"
+            android:textSize="16sp"
+            app:layout_constraintTop_toBottomOf="@id/detailsDivider"
+            tools:text="Description goes here..." />
 
-            <com.google.android.material.card.MaterialCardView
-                android:id="@+id/cardPostInfo"
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_margin="16dp"
-                app:cardCornerRadius="12dp"
-                app:cardElevation="4dp"
-                app:layout_constraintTop_toBottomOf="@id/ivPostImage">
-
-                <androidx.constraintlayout.widget.ConstraintLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:padding="16dp">
-
-                    <TextView
-                        android:id="@+id/tvPostTitle"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:text="Lost Golden Retriever"
-                        android:textColor="@color/logo_teal"
-                        android:textSize="22sp"
-                        android:textStyle="bold"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toTopOf="parent" />
-
-                    <TextView
-                        android:id="@+id/tvPostDetailsLine"
-                        android:layout_width="wrap_content"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="4dp"
-                        android:text="Dog • Lost • 2 hours ago"
-                        android:textColor="@color/text_hint"
-                        android:textSize="14sp"
-                        app:layout_constraintStart_toStartOf="parent"
-                        app:layout_constraintTop_toBottomOf="@id/tvPostTitle" />
-
-                    <View
-                        android:id="@+id/detailsDivider"
-                        android:layout_width="match_parent"
-                        android:layout_height="1dp"
-                        android:layout_marginTop="12dp"
-                        android:background="#DDDDDD"
-                        app:layout_constraintTop_toBottomOf="@id/tvPostDetailsLine" />
-
-                    <TextView
-                        android:id="@+id/tvPostContent"
-                        android:layout_width="match_parent"
-                        android:layout_height="wrap_content"
-                        android:layout_marginTop="12dp"
-                        android:text="Found this dog wandering near the central park. He looks very friendly but scared. Please contact me if you know the owner."
-                        android:textColor="@color/black"
-                        android:textSize="16sp"
-                        app:layout_constraintTop_toBottomOf="@id/detailsDivider" />
-
-                </androidx.constraintlayout.widget.ConstraintLayout>
-            </com.google.android.material.card.MaterialCardView>
+          <TextView
+            android:id="@+id/tvTimestamps"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:textColor="#888888"
+            android:textSize="11sp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toBottomOf="@id/tvPostContent"
+            tools:text="Created: 01/01/2024\nUpdated: 02/01/2024" />
 
         </androidx.constraintlayout.widget.ConstraintLayout>
-    </ScrollView>
+      </com.google.android.material.card.MaterialCardView>
 
-    <Button
-        android:id="@+id/btnPostAction"
-        android:layout_width="match_parent"
-        android:layout_height="56dp"
-        android:layout_margin="16dp"
-        android:backgroundTint="@color/logo_teal"
-        android:text="Help Rescue"
-        android:textColor="@color/white"
-        android:textStyle="bold"
-        app:layout_constraintBottom_toBottomOf="parent" />
+    </androidx.constraintlayout.widget.ConstraintLayout>
+  </ScrollView>
+
+  <Button
+    android:id="@+id/btnPostAction"
+    android:layout_width="match_parent"
+    android:layout_height="56dp"
+    android:layout_margin="16dp"
+    android:backgroundTint="@color/logo_teal"
+    android:text="Contact Owner"
+    android:textColor="@color/white"
+    android:textStyle="bold"
+    app:layout_constraintBottom_toBottomOf="parent" />
 
 </androidx.constraintlayout.widget.ConstraintLayout>

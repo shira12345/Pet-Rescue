@@ -1,130 +1,140 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="match_parent"
-  android:background="@color/blue_light">
-
-  <LinearLayout
-    android:id="@+id/searchContainer"
+<androidx.coordinatorlayout.widget.CoordinatorLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:background="@color/blue_light"
-    android:elevation="4dp"
-    android:orientation="horizontal"
-    android:padding="8dp"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toTopOf="parent">
+    android:layout_height="match_parent"
+    android:background="?attr/colorSurface">
 
-    <androidx.appcompat.widget.SearchView
-      android:id="@+id/searchView"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_weight="1"
-      android:background="@android:color/white"
-      app:iconifiedByDefault="false"
-      app:queryHint="Search name or description..." />
+    <com.google.android.material.appbar.AppBarLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="?attr/colorSurface"
+        app:elevation="0dp">
 
-    <ImageButton
-      android:id="@+id/btnSort"
-      android:layout_width="48dp"
-      android:layout_height="48dp"
-      android:layout_gravity="center_vertical"
-      android:layout_marginStart="8dp"
-      android:background="?attr/selectableItemBackgroundBorderless"
-      android:contentDescription="Sort by date"
-      android:src="@android:drawable/ic_menu_sort_by_size" />
-  </LinearLayout>
+        <LinearLayout
+            android:id="@+id/searchContainer"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="center_vertical"
+            android:orientation="horizontal"
+            android:paddingHorizontal="16dp"
+            android:paddingVertical="8dp">
 
-  <HorizontalScrollView
-    android:id="@+id/chipsScrollView"
-    android:layout_width="match_parent"
-    android:layout_height="wrap_content"
-    android:paddingHorizontal="8dp"
-    android:scrollbars="none"
-    app:layout_constraintTop_toBottomOf="@id/searchContainer">
+            <com.google.android.material.card.MaterialCardView
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                app:cardBackgroundColor="?attr/colorSurface"
+                app:cardCornerRadius="28dp"
+                app:cardElevation="0dp"
+                app:strokeColor="?attr/colorOutline"
+                app:strokeWidth="1dp">
 
-    <com.google.android.material.chip.ChipGroup
-      android:id="@+id/chipGroupFilters"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      app:singleSelection="true">
+                <androidx.appcompat.widget.SearchView
+                    android:id="@+id/searchView"
+                    android:layout_width="match_parent"
+                    android:layout_height="48dp"
+                    app:iconifiedByDefault="false"
+                    app:queryBackground="@android:color/transparent"
+                    app:queryHint="Search name or description..."
+                    app:searchIcon="@android:drawable/ic_menu_search" />
+            </com.google.android.material.card.MaterialCardView>
 
-      <com.google.android.material.chip.Chip
-        android:id="@+id/chipDog"
-        style="@style/Widget.MaterialComponents.Chip.Choice"
+            <com.google.android.material.button.MaterialButton
+                android:id="@+id/btnSort"
+                style="@style/Widget.Material3.Button.IconButton"
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:layout_marginStart="8dp"
+                android:contentDescription="Sort by date"
+                app:icon="@android:drawable/ic_menu_sort_by_size"
+                app:iconTint="?attr/colorOnSurfaceVariant" />
+        </LinearLayout>
+
+        <HorizontalScrollView
+            android:id="@+id/chipsScrollView"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:clipToPadding="false"
+            android:paddingHorizontal="16dp"
+            android:paddingBottom="8dp"
+            android:scrollbars="none">
+
+            <com.google.android.material.chip.ChipGroup
+                android:id="@+id/chipGroupFilters"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                app:selectionRequired="false"
+                app:singleSelection="true">
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipDog"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Dogs" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipCat"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="Cats" />
+
+                <com.google.android.material.chip.Chip
+                    android:id="@+id/chipMyPosts"
+                    style="@style/Widget.Material3.Chip.Filter"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="My Posts" />
+            </com.google.android.material.chip.ChipGroup>
+        </HorizontalScrollView>
+    </com.google.android.material.appbar.AppBarLayout>
+
+    <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
+        android:id="@+id/swipeRefresh"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <androidx.recyclerview.widget.RecyclerView
+            android:id="@+id/rvPosts"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:clipToPadding="false"
+            android:paddingBottom="16dp"
+            tools:listitem="@layout/item_post" />
+    </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
+
+    <com.facebook.shimmer.ShimmerFrameLayout
+        android:id="@+id/shimmerLayout"
+        android:layout_width="match_parent"
+        android:layout_height="match_parent"
+        android:visibility="gone"
+        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical">
+
+            <include layout="@layout/item_post_skeleton" />
+
+            <include layout="@layout/item_post_skeleton" />
+
+            <include layout="@layout/item_post_skeleton" />
+        </LinearLayout>
+    </com.facebook.shimmer.ShimmerFrameLayout>
+
+    <TextView
+        android:id="@+id/tvEmptyState"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="Dogs" />
+        android:layout_gravity="center"
+        android:text="No posts found matching your criteria"
+        android:textColor="?attr/colorOnSurfaceVariant"
+        android:textSize="16sp"
+        android:visibility="gone" />
 
-      <com.google.android.material.chip.Chip
-        android:id="@+id/chipCat"
-        style="@style/Widget.MaterialComponents.Chip.Choice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="Cats" />
-
-      <com.google.android.material.chip.Chip
-        android:id="@+id/chipMyPosts"
-        style="@style/Widget.MaterialComponents.Chip.Choice"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="My Posts" />
-    </com.google.android.material.chip.ChipGroup>
-  </HorizontalScrollView>
-
-  <androidx.swiperefreshlayout.widget.SwipeRefreshLayout
-    android:id="@+id/swipeRefresh"
-    android:layout_width="0dp"
-    android:layout_height="0dp"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/chipsScrollView">
-
-    <androidx.recyclerview.widget.RecyclerView
-      android:id="@+id/rvPosts"
-      android:layout_width="match_parent"
-      android:layout_height="match_parent"
-      android:clipToPadding="false"
-      android:paddingVertical="8dp"
-      tools:listitem="@layout/item_post" />
-  </androidx.swiperefreshlayout.widget.SwipeRefreshLayout>
-
-  <com.facebook.shimmer.ShimmerFrameLayout
-    android:id="@+id/shimmerLayout"
-    android:layout_width="match_parent"
-    android:layout_height="0dp"
-    android:visibility="visible"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/chipsScrollView">
-
-    <LinearLayout
-      android:layout_width="match_parent"
-      android:layout_height="wrap_content"
-      android:orientation="vertical">
-
-      <include layout="@layout/item_post_skeleton" />
-
-      <include layout="@layout/item_post_skeleton" />
-
-      <include layout="@layout/item_post_skeleton" />
-    </LinearLayout>
-  </com.facebook.shimmer.ShimmerFrameLayout>
-
-  <TextView
-    android:id="@+id/tvEmptyState"
-    android:layout_width="wrap_content"
-    android:layout_height="wrap_content"
-    android:text="No posts found matching your criteria"
-    android:textColor="@android:color/darker_gray"
-    android:textSize="16sp"
-    android:visibility="gone"
-    app:layout_constraintBottom_toBottomOf="parent"
-    app:layout_constraintEnd_toEndOf="parent"
-    app:layout_constraintStart_toStartOf="parent"
-    app:layout_constraintTop_toBottomOf="@id/chipsScrollView" />
-
-</androidx.constraintlayout.widget.ConstraintLayout>
+</androidx.coordinatorlayout.widget.CoordinatorLayout>

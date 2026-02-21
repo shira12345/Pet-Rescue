@@ -90,6 +90,7 @@ dependencies {
 
   implementation(libs.androidx.swiperefreshlayout)
   implementation(libs.shimmer)
+  implementation(libs.material)
 
   testImplementation(libs.junit)
   androidTestImplementation(libs.androidx.junit)

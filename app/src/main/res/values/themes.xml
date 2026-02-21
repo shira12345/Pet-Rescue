@@ -1,17 +1,52 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources xmlns:tools="http://schemas.android.com/tools">
-    <!-- Base application theme. -->
-    <style name="Theme.PetRescue" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <!-- Primary brand color. -->
-        <item name="colorPrimary">@color/blue_primary</item>
-        <item name="colorPrimaryVariant">@color/blue_primary_variant</item>
-        <item name="colorOnPrimary">@color/white</item>
-        <!-- Secondary brand color. -->
-        <item name="colorSecondary">@color/blue_accent</item>
-        <item name="colorSecondaryVariant">@color/blue_dark</item>
-        <item name="colorOnSecondary">@color/black</item>
-        <!-- Status bar color. -->
-        <item name="android:statusBarColor">?attr/colorPrimaryVariant</item>
-        <!-- Customize your theme here. -->
-    </style>
+<resources>
+
+  <style name="Theme.PetRescue" parent="Theme.Material3.Light.NoActionBar">
+    <!-- Primary brand color. -->
+    <item name="colorPrimary">@color/logo_teal</item>
+    <item name="colorOnPrimary">@color/white</item>
+    <item name="colorPrimaryContainer">@color/logo_teal_light</item>
+    <item name="colorOnPrimaryContainer">@color/logo_teal_dark</item>
+
+    <!-- Secondary brand color. -->
+    <item name="colorSecondary">@color/logo_orange</item>
+    <item name="colorOnSecondary">@color/white</item>
+    <item name="colorSecondaryContainer">@color/logo_teal_light</item>
+    <item name="colorOnSecondaryContainer">@color/logo_teal</item>
+
+    <!-- Tertiary brand color. -->
+    <item name="colorTertiary">@color/blue_dark</item>
+    <item name="colorOnTertiary">@color/white</item>
+
+    <!-- Status bar color. -->
+    <item name="android:statusBarColor">@color/logo_teal</item>
+    <item name="android:windowLightStatusBar">false</item>
+
+    <!-- Background and Surface colors. -->
+    <item name="android:windowBackground">@color/blue_light</item>
+    <item name="colorSurface">@color/blue_light</item>
+    <item name="colorOnSurface">@color/blue_dark</item>
+
+    <!-- Fix for pink search bar and surfaces -->
+    <item name="colorSurfaceVariant">#E8F3F4</item>
+    <item name="colorOnSurfaceVariant">@color/text_hint</item>
+
+    <!-- Fix for pink title on scroll (Material 3 Surface Transform) -->
+    <item name="colorSurfaceContainer">@color/blue_light</item>
+    <item name="colorSurfaceContainerHigh">@color/blue_light</item>
+    <item name="colorSurfaceContainerHighest">@color/blue_light</item>
+
+    <item name="colorOutline">@color/logo_teal</item>
+    <item name="colorOutlineVariant">#CFE5E6</item>
+  </style>
+
+  <style name="Widget.App.BottomNavigationView" parent="Widget.Material3.BottomNavigationView">
+    <item name="itemActiveIndicatorStyle">@style/Widget.App.BottomNavigationView.ActiveIndicator</item>
+    <item name="itemIconTint">@color/bottom_nav_colors</item>
+    <item name="itemTextColor">@color/bottom_nav_colors</item>
+  </style>
+
+  <style name="Widget.App.BottomNavigationView.ActiveIndicator" parent="Widget.Material3.BottomNavigationView.ActiveIndicator">
+    <item name="android:color">#3300B5B8</item> <!-- Semi-transparent teal for indicator -->
+  </style>
+
 </resources>

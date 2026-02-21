@@ -1,6 +1,5 @@
 package com.example.petrescue.features.post_form
 
-import android.R
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -70,7 +69,7 @@ class PostFormFragment : Fragment() {
   }
 
   private suspend fun fillForm(post: Post) {
-    binding.postFormTitle.text = "Edit Rescue Post"
+    binding.toolbar.title = "Edit Rescue Post"
     binding.loadingOverlayTextView.text = "Updating your post..."
     binding.buttonSubmit.text = "Update Post"
 
@@ -125,7 +124,7 @@ class PostFormFragment : Fragment() {
     viewModel.results.observe(viewLifecycleOwner) { locations ->
       val adapter = ArrayAdapter(
         requireContext(),
-        R.layout.simple_dropdown_item_1line,
+        android.R.layout.simple_dropdown_item_1line,
         locations.map { getFirstThreeWords(it.displayName) }
       )
 
@@ -154,11 +153,11 @@ class PostFormFragment : Fragment() {
   }
 
   private fun setupPetTypeDropdown() {
-    val types = listOf("Dog", "Cat", "Bird", "Other")
+    val types = listOf(Post.TYPE_DOG, Post.TYPE_CAT, Post.TYPE_BIRD, Post.TYPE_OTHER)
 
     val adapter = ArrayAdapter(
       requireContext(),
-      R.layout.simple_dropdown_item_1line,
+      android.R.layout.simple_dropdown_item_1line,
       types
     )
 

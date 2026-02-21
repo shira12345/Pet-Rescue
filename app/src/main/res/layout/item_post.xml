@@ -1,92 +1,115 @@
 <?xml version="1.0" encoding="utf-8"?>
 <com.google.android.material.card.MaterialCardView xmlns:android="http://schemas.android.com/apk/res/android"
-  xmlns:app="http://schemas.android.com/apk/res-auto"
-  xmlns:tools="http://schemas.android.com/tools"
-  android:layout_width="match_parent"
-  android:layout_height="wrap_content"
-  android:layout_marginHorizontal="16dp"
-  android:layout_marginVertical="8dp"
-  app:cardCornerRadius="12dp"
-  app:cardElevation="4dp">
-
-  <androidx.constraintlayout.widget.ConstraintLayout
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
-    android:layout_height="wrap_content">
+    android:layout_height="wrap_content"
+    android:layout_marginHorizontal="16dp"
+    android:layout_marginVertical="8dp"
+    app:cardCornerRadius="16dp"
+    app:cardElevation="0dp"
+    app:strokeColor="?attr/colorOutlineVariant"
+    app:strokeWidth="1dp">
 
-    <ImageView
-      android:id="@+id/ivPostImage"
-      android:layout_width="match_parent"
-      android:layout_height="200dp"
-      android:scaleType="centerCrop"
-      app:layout_constraintTop_toTopOf="parent"
-      tools:src="@drawable/logo" />
+    <androidx.constraintlayout.widget.ConstraintLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content">
 
-    <TextView
-      android:id="@+id/tvStatusTag"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_margin="12dp"
-      android:background="@color/logo_teal"
-      android:paddingHorizontal="12dp"
-      android:paddingVertical="4dp"
-      android:text="Lost"
-      android:textColor="@color/white"
-      android:textSize="12sp"
-      android:textStyle="bold"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+        <FrameLayout
+            android:id="@+id/imageContainer"
+            android:layout_width="match_parent"
+            android:layout_height="220dp"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <com.google.android.material.button.MaterialButton
-      android:id="@+id/btnEdit"
-      android:layout_width="wrap_content"
-      android:layout_height="wrap_content"
-      android:layout_margin="12dp"
-      android:text="Edit"
-      android:textSize="12sp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintTop_toTopOf="parent" />
+            <com.google.android.material.progressindicator.CircularProgressIndicator
+                android:id="@+id/imageProgressBar"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:indeterminate="true"
+                app:indicatorSize="32dp" />
 
-    <TextView
-      android:id="@+id/tvPetName"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_margin="16dp"
-      android:text="Buddy"
-      android:textColor="@color/logo_teal"
-      android:textSize="20sp"
-      android:textStyle="bold"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/ivPostImage" />
+            <ImageView
+                android:id="@+id/ivPostImage"
+                android:layout_width="match_parent"
+                android:layout_height="match_parent"
+                android:scaleType="centerCrop"
+                tools:src="@drawable/logo" />
+        </FrameLayout>
 
-    <TextView
-      android:id="@+id/tvDetails"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginHorizontal="16dp"
-      android:layout_marginTop="4dp"
-      android:text="Dog • Golden Retriever"
-      android:textColor="@color/text_hint"
-      android:textSize="14sp"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/tvPetName" />
+        <com.google.android.material.card.MaterialCardView
+            android:id="@+id/statusCard"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            app:cardBackgroundColor="?attr/colorPrimary"
+            app:cardCornerRadius="8dp"
+            app:cardElevation="0dp"
+            app:layout_constraintStart_toStartOf="parent"
+            app:layout_constraintTop_toTopOf="parent">
 
-    <TextView
-      android:id="@+id/tvDescription"
-      android:layout_width="0dp"
-      android:layout_height="wrap_content"
-      android:layout_marginHorizontal="16dp"
-      android:layout_marginTop="8dp"
-      android:layout_marginBottom="16dp"
-      android:ellipsize="end"
-      android:maxLines="2"
-      android:text="Found this dog wandering near the park..."
-      android:textColor="@color/black"
-      app:layout_constraintBottom_toBottomOf="parent"
-      app:layout_constraintEnd_toEndOf="parent"
-      app:layout_constraintStart_toStartOf="parent"
-      app:layout_constraintTop_toBottomOf="@id/tvDetails" />
+            <TextView
+                android:id="@+id/tvStatusTag"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:paddingHorizontal="10dp"
+                android:paddingVertical="4dp"
+                android:text="Lost"
+                android:textColor="?attr/colorOnPrimary"
+                android:textSize="11sp"
+                android:textStyle="bold" />
+        </com.google.android.material.card.MaterialCardView>
 
-  </androidx.constraintlayout.widget.ConstraintLayout>
+        <com.google.android.material.button.MaterialButton
+            android:id="@+id/btnEdit"
+            style="@style/Widget.Material3.Button.TonalButton"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_margin="12dp"
+            android:minHeight="32dp"
+            android:text="Edit"
+            android:textSize="12sp"
+            android:visibility="gone"
+            app:layout_constraintEnd_toEndOf="parent"
+            app:layout_constraintTop_toTopOf="parent"
+            tools:visibility="visible" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="16dp"
+            app:layout_constraintTop_toBottomOf="@id/imageContainer">
+
+            <TextView
+                android:id="@+id/tvPetName"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Buddy"
+                android:textAppearance="?attr/textAppearanceTitleLarge"
+                android:textColor="?attr/colorOnSurface" />
+
+            <TextView
+                android:id="@+id/tvDetails"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="2dp"
+                android:text="Dog • Golden Retriever"
+                android:textAppearance="?attr/textAppearanceBodyMedium"
+                android:textColor="?attr/colorOnSurfaceVariant" />
+
+            <TextView
+                android:id="@+id/tvDescription"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:layout_marginTop="8dp"
+                android:ellipsize="end"
+                android:maxLines="2"
+                android:text="Found this dog wandering near the park..."
+                android:textAppearance="?attr/textAppearanceBodyLarge"
+                android:textColor="?attr/colorOnSurface" />
+
+        </LinearLayout>
+
+    </androidx.constraintlayout.widget.ConstraintLayout>
 </com.google.android.material.card.MaterialCardView>

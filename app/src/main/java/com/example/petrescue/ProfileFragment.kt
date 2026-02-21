@@ -16,130 +16,133 @@ import com.example.petrescue.databinding.FragmentProfileBinding
 import com.example.petrescue.features.posts_feed.PostsAdapter
 import com.example.petrescue.model.Post
 import com.example.petrescue.utilis.extensions.bitmap
+import com.google.firebase.auth.FirebaseAuth
 import com.squareup.picasso.Picasso
 
 class ProfileFragment : Fragment() {
 
-  private var _binding: FragmentProfileBinding? = null
-  private val binding get() = _binding!!
-  private val viewModel: AuthViewModel by activityViewModels()
-  private var userEmail: String? = null
-  private lateinit var postsAdapter: PostsAdapter
+    private var _binding: FragmentProfileBinding? = null
+    private val binding get() = _binding!!
+    private val viewModel: AuthViewModel by activityViewModels()
+    private var userEmail: String? = null
+    private lateinit var postsAdapter: PostsAdapter
 
-  private val imagePickerLauncher =
-    registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
-      uri?.let {
-        binding.ivProfileImage.setImageURI(it)
-      }
-    }
-
-  override fun onCreateView(
-    inflater: LayoutInflater,
-    container: ViewGroup?,
-    savedInstanceState: Bundle?
-  ): View {
-    _binding = FragmentProfileBinding.inflate(inflater, container, false)
-    return binding.root
-  }
-
-  override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
-    super.onViewCreated(view, savedInstanceState)
-
-    setupRecyclerView()
-    setupObservers()
-    setupListeners()
-  }
-
-  private fun setupRecyclerView() {
-    postsAdapter = PostsAdapter(
-      onPostClick = { post -> navigateToPostDetailsFragment(post) },
-      onEditClick = { post -> navigateToEditPostFormFragment(post) })
-
-    binding.rvMyReports.adapter = postsAdapter
-  }
-
-  private fun navigateToPostDetailsFragment(post: Post) {
-    val action = ProfileFragmentDirections.actionProfileFragmentToPostDetailsFragment(post)
-
-    findNavController().navigate(action)
-  }
-
-  private fun navigateToEditPostFormFragment(post: Post) {
-    val action = ProfileFragmentDirections.actionProfileFragmentToPostFormFragment(post)
-
-    findNavController().navigate(action)
-  }
-
-  private fun setupObservers() {
-    viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
-      user?.let {
-        userEmail = it.email
-        binding.tvUsername.text = it.username
-        binding.tvEmail.text = it.email
-        binding.etPhone.setText(it.phoneNumber)
-        binding.etAnimal.setText(it.animal)
-
-        if (!it.profileImage.isNullOrEmpty()) {
-          Picasso.get().load(it.profileImage).placeholder(R.drawable.logo)
-            .into(binding.ivProfileImage)
-        } else {
-          binding.ivProfileImage.setImageResource(R.drawable.logo)
+    private val imagePickerLauncher =
+        registerForActivityResult(ActivityResultContracts.GetContent()) { uri: Uri? ->
+            uri?.let {
+                binding.ivProfileImage.setImageURI(it)
+            }
         }
-      }
+
+    override fun onCreateView(
+        inflater: LayoutInflater,
+        container: ViewGroup?,
+        savedInstanceState: Bundle?
+    ): View {
+        _binding = FragmentProfileBinding.inflate(inflater, container, false)
+        return binding.root
     }
 
-    viewModel.userPostsLiveData.observe(viewLifecycleOwner) { posts ->
-      postsAdapter.submitList(posts)
-      binding.tvNoReports.isVisible = posts.isEmpty()
-      binding.rvMyReports.isVisible = posts.isNotEmpty()
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        super.onViewCreated(view, savedInstanceState)
+
+        setupRecyclerView()
+        setupObservers()
+        setupListeners()
     }
 
-    viewModel.loadingLiveData.observe(viewLifecycleOwner) { isLoading ->
-      binding.progressBar.isVisible = isLoading
-      binding.btnSave.isEnabled = !isLoading
+    private fun setupRecyclerView() {
+        postsAdapter = PostsAdapter(
+            onPostClick = { post -> navigateToPostDetailsFragment(post) },
+            onEditClick = { post -> navigateToEditPostFormFragment(post) },
+            currentUserEmail = FirebaseAuth.getInstance().currentUser?.email
+        )
+
+        binding.rvMyReports.adapter = postsAdapter
     }
 
-    viewModel.errorLiveData.observe(viewLifecycleOwner) { error ->
-      error?.let {
-        Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
-        viewModel.clearError()
-      }
-    }
-  }
+    private fun navigateToPostDetailsFragment(post: Post) {
+        val action = ProfileFragmentDirections.actionProfileFragmentToPostDetailsFragment(post)
 
-  private fun setupListeners() {
-    binding.btnSave.setOnClickListener {
-      val email = userEmail ?: binding.tvEmail.text.toString()
-      val username = binding.tvUsername.text.toString()
-      val phone = binding.etPhone.text.toString().trim()
-      val animal = binding.etAnimal.text.toString().trim()
-      val imageBitmap = binding.ivProfileImage.bitmap
-
-      viewModel.updateProfile(email, username, phone, animal, imageBitmap)
-      Toast.makeText(requireContext(), "Updating profile...", Toast.LENGTH_SHORT).show()
+        findNavController().navigate(action)
     }
 
-    binding.btnLogout.setOnClickListener {
-      viewModel.logout()
-      findNavController().navigate(R.id.action_profileFragment_to_loginFragment)
+    private fun navigateToEditPostFormFragment(post: Post) {
+        val action = ProfileFragmentDirections.actionProfileFragmentToPostFormFragment(post)
+
+        findNavController().navigate(action)
     }
 
-    binding.fabEditImage.setOnClickListener {
-      imagePickerLauncher.launch("image/*")
+    private fun setupObservers() {
+        viewModel.localUserLiveData.observe(viewLifecycleOwner) { user ->
+            user?.let {
+                userEmail = it.email
+                binding.tvUsername.text = it.username
+                binding.tvEmail.text = it.email
+                binding.etPhone.setText(it.phoneNumber)
+                binding.etAnimal.setText(it.animal)
+
+                if (!it.profileImage.isNullOrEmpty()) {
+                    Picasso.get().load(it.profileImage).placeholder(R.drawable.logo)
+                        .into(binding.ivProfileImage)
+                } else {
+                    binding.ivProfileImage.setImageResource(R.drawable.logo)
+                }
+            }
+        }
+
+        viewModel.userPostsLiveData.observe(viewLifecycleOwner) { posts ->
+            postsAdapter.submitList(posts)
+            binding.tvNoReports.isVisible = posts.isEmpty()
+            binding.rvMyReports.isVisible = posts.isNotEmpty()
+        }
+
+        viewModel.loadingLiveData.observe(viewLifecycleOwner) { isLoading ->
+            binding.progressBar.isVisible = isLoading
+            binding.btnSave.isEnabled = !isLoading
+        }
+
+        viewModel.errorLiveData.observe(viewLifecycleOwner) { error ->
+            error?.let {
+                Toast.makeText(requireContext(), it, Toast.LENGTH_SHORT).show()
+                viewModel.clearError()
+            }
+        }
     }
 
-    binding.fabDeleteImage.setOnClickListener {
-      binding.ivProfileImage.setImageResource(R.drawable.logo)
-      userEmail?.let { email ->
-        viewModel.deleteProfileImage(email)
-      }
-      Toast.makeText(requireContext(), "Image cleared. Click Save to confirm.", Toast.LENGTH_SHORT)
-        .show()
-    }
-  }
+    private fun setupListeners() {
+        binding.btnSave.setOnClickListener {
+            val email = userEmail ?: binding.tvEmail.text.toString()
+            val username = binding.tvUsername.text.toString()
+            val phone = binding.etPhone.text.toString().trim()
+            val animal = binding.etAnimal.text.toString().trim()
+            val imageBitmap = binding.ivProfileImage.bitmap
 
-  override fun onDestroyView() {
-    super.onDestroyView()
-    _binding = null
-  }
+            viewModel.updateProfile(email, username, phone, animal, imageBitmap)
+            Toast.makeText(requireContext(), "Updating profile...", Toast.LENGTH_SHORT).show()
+        }
+
+        binding.btnLogout.setOnClickListener {
+            viewModel.logout()
+            findNavController().navigate(R.id.action_profileFragment_to_loginFragment)
+        }
+
+        binding.fabEditImage.setOnClickListener {
+            imagePickerLauncher.launch("image/*")
+        }
+
+        binding.fabDeleteImage.setOnClickListener {
+            binding.ivProfileImage.setImageResource(R.drawable.logo)
+            userEmail?.let { email ->
+                viewModel.deleteProfileImage(email)
+            }
+            Toast.makeText(requireContext(), "Image cleared. Click Save to confirm.", Toast.LENGTH_SHORT)
+                .show()
+        }
+    }
+
+    override fun onDestroyView() {
+        super.onDestroyView()
+        _binding = null
+    }
 }

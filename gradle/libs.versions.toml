@@ -15,6 +15,7 @@ lifecycleRuntimeKtx = "2.10.0"
 activityCompose = "1.12.2"
 composeBom = "2024.09.00"
 lifecycleViewmodelKtx = "2.8.0"
+material = "1.13.0"
 navigation = "2.9.6"
 places = "5.1.1"
 playServicesLocation = "21.3.0"
@@ -69,6 +70,7 @@ firebase-auth = { group = "com.google.firebase", name = "firebase-auth-ktx" }
 java-jwt = { group = "com.auth0", name = "java-jwt", version.ref = "javaJwt" }
 kotlinx-coroutines-android = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroid" }
 kotlinx-coroutines-android-v173 = { module = "org.jetbrains.kotlinx:kotlinx-coroutines-android", version.ref = "kotlinxCoroutinesAndroidVersion" }
+material = { module = "com.google.android.material:material", version.ref = "material" }
 picasso = { group = "com.squareup.picasso", name = "picasso", version.ref = "picasso" }
 places = { module = "com.google.android.libraries.places:places", version.ref = "places" }
 play-services-location = { module = "com.google.android.gms:play-services-location", version.ref = "playServicesLocation" }

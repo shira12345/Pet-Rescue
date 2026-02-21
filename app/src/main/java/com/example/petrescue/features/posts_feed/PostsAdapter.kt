@@ -36,6 +36,12 @@ class PostsAdapter(
     holder.bind(getItem(position), currentUserEmail)
   }
 
+  /**
+   * ViewHolder for individual post items.
+   *
+   * @param binding View binding for the post item layout.
+   * @param onPostClick Callback for root view clicks.
+   */
   class PostViewHolder(
     private val binding: ItemPostBinding,
     private val onPostClick: (Post) -> Unit,
@@ -43,6 +49,13 @@ class PostsAdapter(
     private val onDeleteClick: (Post) -> Unit
   ) : RecyclerView.ViewHolder(binding.root) {
 
+    /**
+     * Binds post data to the UI elements.
+     *
+     * @param post The post object to display.
+     * @param currentUserEmail Email used to determine ownership for edit permissions.
+     * @param onEditClick Callback for the edit button.
+     */
     fun bind(post: Post, currentUserEmail: String?) {
       binding.tvPetName.text = post.petName
       binding.tvStatusTag.text = post.status
@@ -68,7 +81,6 @@ class PostsAdapter(
         binding.ivPostImage.setImageResource(com.example.petrescue.R.drawable.logo)
       }
 
-      // Visibility logic: only creator sees actions
       val isCreator = !currentUserEmail.isNullOrEmpty() && currentUserEmail.equals(post.creatorEmail, ignoreCase = true)
       binding.llActions.visibility = if (isCreator) View.VISIBLE else View.GONE
       binding.btnEdit.visibility = if (isCreator) View.VISIBLE else View.GONE
@@ -83,6 +95,9 @@ class PostsAdapter(
     }
   }
 
+  /**
+   * Callback for calculating the diff between two non-null items in a list.
+   */
   class PostDiffCallback : DiffUtil.ItemCallback<Post>() {
     override fun areItemsTheSame(oldItem: Post, newItem: Post): Boolean {
       return oldItem.id == newItem.id

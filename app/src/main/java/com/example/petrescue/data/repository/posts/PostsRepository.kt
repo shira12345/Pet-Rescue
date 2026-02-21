@@ -144,4 +144,23 @@ class PostsRepository {
     
     return postWithId
   }
+
+  /**
+   * Deletes a post from both Firestore and the local database.
+   *
+   * @param post The post object to delete.
+   */
+  suspend fun deletePost(post: Post) {
+    if (db != null && post.id.isNotEmpty()) {
+      try {
+        db.collection(POSTS).document(post.id).delete().await()
+      } catch (exception: Exception) {
+        Log.e("PostsRepository", "Error deleting post from Firestore", exception)
+      }
+    }
+
+    withContext(Dispatchers.IO) {
+      postDao.deletePost(post)
+    }
+  }
 }

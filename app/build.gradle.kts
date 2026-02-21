@@ -6,6 +6,8 @@ plugins {
   alias(libs.plugins.kotlin.compose)
   alias(libs.plugins.ksp)
   alias(libs.plugins.google.services)
+  alias(libs.plugins.navigation.safeargs)
+  id("kotlin-parcelize")
 }
 
 android {
@@ -68,8 +70,11 @@ dependencies {
   implementation(libs.androidx.fragment)
   implementation(libs.androidx.room.runtime)
   implementation(libs.androidx.room.ktx)
-  implementation(libs.firebase.firestore.ktx)
-  implementation(libs.firebase.storage.ktx)
+  
+  // Fixed Firebase dependency names to match libs.versions.toml
+  implementation(libs.firebase.firestore)
+  implementation(libs.firebase.storage)
+  
   ksp(libs.androidx.room.compiler)
   implementation(platform(libs.firebase.bom))
   implementation(libs.firebase.auth)

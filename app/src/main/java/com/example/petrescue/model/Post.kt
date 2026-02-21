@@ -1,15 +1,19 @@
 package com.example.petrescue.model
 
 import android.content.Context
+import android.os.Parcelable
 import androidx.annotation.Keep
 import androidx.room.Entity
+import androidx.room.Ignore
 import androidx.room.PrimaryKey
 import com.example.petrescue.base.MyApplication
 import com.google.firebase.Timestamp
 import com.google.firebase.firestore.FieldValue
+import kotlinx.parcelize.Parcelize
 import java.util.Date
 
 @Keep
+@Parcelize
 @Entity(tableName = "posts")
 data class Post(
   @PrimaryKey val id: String = "",
@@ -25,7 +29,7 @@ data class Post(
   val longitude: Double = 0.0,
   val createdAt: Long = System.currentTimeMillis(),
   val updatedAt: Long = System.currentTimeMillis()
-) {
+) : Parcelable {
   companion object {
     var lastUpdated: Long
       get() {
@@ -35,7 +39,7 @@ data class Post(
       }
       set(value) {
         MyApplication.Globals.appContext
-          ?.getSharedPreferences("", Context.MODE_PRIVATE)
+          ?.getSharedPreferences("TAG", Context.MODE_PRIVATE)
           ?.edit()
           ?.putLong(UPDATED_AT_KEY, value)
           ?.apply()
@@ -72,8 +76,7 @@ data class Post(
       val createdLong = createdTimestamp?.toDate()?.time ?: System.currentTimeMillis()
 
       val updatedTimestamp = json[UPDATED_AT_KEY] as? Timestamp
-      val updatedLong =
-        updatedTimestamp?.toDate()?.time ?: createdLong
+      val updatedLong = updatedTimestamp?.toDate()?.time ?: createdLong
 
       return Post(
         id = id,
@@ -93,6 +96,7 @@ data class Post(
     }
   }
 
+  @get:Ignore
   val toJson: Map<String, Any?>
     get() = hashMapOf(
       ID_KEY to id,
@@ -106,11 +110,7 @@ data class Post(
       CREATOR_PHONE_KEY to creatorPhone,
       LATITUDE_KEY to latitude,
       LONGITUDE_KEY to longitude,
-      CREATED_AT_KEY to if (createdAt == 0L) FieldValue.serverTimestamp() else Timestamp(
-        Date(
-          createdAt
-        )
-      ),
+      CREATED_AT_KEY to if (createdAt == 0L) FieldValue.serverTimestamp() else Timestamp(Date(createdAt)),
       UPDATED_AT_KEY to FieldValue.serverTimestamp()
     )
 }

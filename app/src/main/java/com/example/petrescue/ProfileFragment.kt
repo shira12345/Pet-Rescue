@@ -7,7 +7,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
-import androidx.core.os.bundleOf
 import androidx.core.view.isVisible
 import androidx.fragment.app.Fragment
 import androidx.fragment.app.activityViewModels
@@ -54,19 +53,14 @@ class ProfileFragment : Fragment() {
 
   private fun setupRecyclerView() {
     postsAdapter = PostsAdapter { post ->
-      val bundle = bundleOf(
-        Post.PET_NAME_KEY to post.petName,
-        Post.PET_TYPE_KEY to post.petType,
-        Post.BREED_KEY to post.breed,
-        Post.STATUS_KEY to post.status,
-        Post.DESCRIPTION_KEY to post.description,
-        Post.IMAGE_URI_KEY to post.imageUri,
-        Post.CREATOR_EMAIL_KEY to post.creatorEmail,
-        Post.CREATOR_PHONE_KEY to post.creatorPhone
-      )
-      findNavController().navigate(R.id.action_profileFragment_to_postDetailsFragment, bundle)
+      navigateToPostDetailsFragment(post)
     }
     binding.rvMyReports.adapter = postsAdapter
+  }
+
+  private fun navigateToPostDetailsFragment(post: Post) {
+    val action = ProfileFragmentDirections.actionProfileFragmentToPostDetailsFragment(post)
+    findNavController().navigate(action)
   }
 
   private fun setupObservers() {

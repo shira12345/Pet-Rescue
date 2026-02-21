@@ -64,9 +64,16 @@ class CloudinaryRepository {
             continuation.resumeWithException(Exception(error?.description ?: "Unknown Cloudinary error"))
           }
 
-          override fun onStart(requestId: String) {}
-          override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {}
-          override fun onReschedule(requestId: String?, error: ErrorInfo?) {}
+          override fun onStart(requestId: String) {   println("Starting to upload with request id $requestId")
+          }
+
+          override fun onProgress(requestId: String, bytes: Long, totalBytes: Long) {
+            println("Image upload process: $bytes / $totalBytes bytes")
+          }
+
+          override fun onReschedule(requestId: String?, error: ErrorInfo?) {
+            println(error)
+          }
         })
         .dispatch()
 

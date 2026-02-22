@@ -55,6 +55,8 @@ data class Post(
     const val TYPE_BIRD = "Bird"
     const val TYPE_OTHER = "Other"
 
+    private const val PREFS_NAME = "POSTS_PREFS"
+
     /**
      * Globally tracks the last time any post was updated, used for delta-sync with remote DB.
      * Persisted in SharedPreferences.
@@ -62,12 +64,12 @@ data class Post(
     var lastUpdated: Long
       get() {
         return MyApplication.appContext
-          ?.getSharedPreferences("TAG", Context.MODE_PRIVATE)
+          ?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
           ?.getLong(UPDATED_AT_KEY, 0) ?: 0
       }
       set(value) {
         MyApplication.appContext
-          ?.getSharedPreferences("", Context.MODE_PRIVATE)
+          ?.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
           ?.edit()
           ?.putLong(UPDATED_AT_KEY, value)
           ?.apply()

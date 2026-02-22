@@ -17,6 +17,7 @@ import androidx.fragment.app.viewModels
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.findNavController
 import androidx.navigation.fragment.navArgs
+import com.example.petrescue.R
 import com.example.petrescue.databinding.FragmentPostFormBinding
 import com.example.petrescue.model.Post
 import com.example.petrescue.utilis.extensions.bitmap
@@ -90,7 +91,7 @@ class PostFormFragment : Fragment() {
       if (post.status == "Found") binding.buttonFound.id else binding.buttonLost.id
     updateSelectedStatusButton(statusButtonId)
 
-    Picasso.get().load(post.imageUri).into(binding.imagePet)
+    Picasso.get().load(post.imageUri).placeholder(R.drawable.logo).into(binding.imagePet)
     imageUri = post.imageUri?.toUri()
   }
 

@@ -72,17 +72,37 @@ class PostsRepository {
   /**
    * Syncs local data with the remote Firestore database.
    * Fetches only posts that were updated after the last known local sync time.
+   * Also cleans up local posts that were deleted remotely.
    */
   suspend fun refreshPosts() {
     val lastUpdated = Post.lastUpdated
     val newPosts = getPostsFromDB(lastUpdated)
 
+    // 1. Update/Insert new or modified posts
     if (newPosts.isNotEmpty()) {
       withContext(Dispatchers.IO) {
         postDao.insertPosts(newPosts)
 
         val newestTime = newPosts.maxOf { it.updatedAt }
         Post.lastUpdated = max(lastUpdated, newestTime)
+      }
+    }
+
+    // 2. Sync Deletions: Remove local posts that no longer exist in Firestore
+    if (db != null) {
+      try {
+        val snapshot = db.collection(POSTS).get().await()
+        val remoteIds = snapshot.documents.map { it.id }.toSet()
+
+        withContext(Dispatchers.IO) {
+          val localPosts = postDao.getAllPostsSync()
+          val postsToRemove = localPosts.filter { it.id !in remoteIds }
+          if (postsToRemove.isNotEmpty()) {
+            postDao.deletePosts(postsToRemove)
+          }
+        }
+      } catch (e: Exception) {
+        Log.e("PostsRepository", "Error syncing deletions", e)
       }
     }
   }

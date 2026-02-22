@@ -72,7 +72,6 @@ class FeedFragment : Fragment() {
     )
 
     binding.swipeRefresh.setOnRefreshListener {
-      binding.swipeRefresh.isRefreshing = true
       refreshData()
     }
 
@@ -140,6 +139,7 @@ class FeedFragment : Fragment() {
 
       binding.shimmerLayout.stopShimmer()
       binding.shimmerLayout.visibility = View.GONE
+      binding.swipeRefresh.visibility = View.VISIBLE
 
       filterAndSort(binding.searchView.query.toString())
 
@@ -180,10 +180,8 @@ class FeedFragment : Fragment() {
 
     if (filteredList.isEmpty()) {
       binding.tvEmptyState.visibility = View.VISIBLE
-      binding.swipeRefresh.visibility = View.GONE
     } else {
       binding.tvEmptyState.visibility = View.GONE
-      binding.swipeRefresh.visibility = View.VISIBLE
     }
   }
 

@@ -32,14 +32,17 @@ class PostFormViewModel : ViewModel() {
 
   /** The currently selected latitude for the post. */
   var selectedLat: Double? = null
+
   /** The currently selected longitude for the post. */
   var selectedLon: Double? = null
 
   private val _results = MutableLiveData<List<LocationIQResult>>()
+
   /** Observable list of location search results. */
   val results: LiveData<List<LocationIQResult>> = _results
 
   private val _postFormState = MutableLiveData<PostFormState>(PostFormState.Idle)
+
   /** Observable state of the post submission process (Idle, Loading, Success, Error). */
   val postFormState: LiveData<PostFormState> = _postFormState
 

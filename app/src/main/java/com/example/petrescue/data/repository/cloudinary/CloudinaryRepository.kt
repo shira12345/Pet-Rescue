@@ -16,6 +16,8 @@ import kotlin.coroutines.resumeWithException
 class CloudinaryRepository {
   companion object {
     val shared = CloudinaryRepository()
+    private const val MAX_IMAGE_SIZE = 1024
+    private const val COMPRESSION_QUALITY = 80
   }
 
   init {
@@ -34,7 +36,7 @@ class CloudinaryRepository {
 
         MediaManager.get().globalUploadPolicy = GlobalUploadPolicy.Builder()
           .maxConcurrentRequests(3)
-          .networkPolicy(UploadPolicy.NetworkType.UNMETERED)
+          .networkPolicy(UploadPolicy.NetworkType.ANY)
           .build()
       }
     }
@@ -53,7 +55,8 @@ class CloudinaryRepository {
           Exception("App context is null")
         )
 
-      val imageFile = bitmapToFile(imageBitmap, appContext)
+      val resizedBitmap = resizeBitmap(imageBitmap)
+      val imageFile = bitmapToFile(resizedBitmap, appContext)
 
       val requestId = MediaManager.get().upload(imageFile.path)
         .option("folder", folder)
@@ -90,10 +93,31 @@ class CloudinaryRepository {
       continuation.invokeOnCancellation { MediaManager.get().cancelRequest(requestId) }
     }
 
+  private fun resizeBitmap(bitmap: Bitmap): Bitmap {
+    val width = bitmap.width
+    val height = bitmap.height
+
+    if (width <= MAX_IMAGE_SIZE && height <= MAX_IMAGE_SIZE) return bitmap
+
+    val aspectRatio: Float = width.toFloat() / height.toFloat()
+    val newWidth: Int
+    val newHeight: Int
+
+    if (width > height) {
+      newWidth = MAX_IMAGE_SIZE
+      newHeight = (MAX_IMAGE_SIZE / aspectRatio).toInt()
+    } else {
+      newHeight = MAX_IMAGE_SIZE
+      newWidth = (MAX_IMAGE_SIZE * aspectRatio).toInt()
+    }
+
+    return Bitmap.createScaledBitmap(bitmap, newWidth, newHeight, true)
+  }
+
   private fun bitmapToFile(image: Bitmap, context: Context): File {
     val file = File(context.cacheDir, "temp_image_${System.currentTimeMillis()}.jpg")
     file.outputStream().use {
-      image.compress(Bitmap.CompressFormat.JPEG, 100, it)
+      image.compress(Bitmap.CompressFormat.JPEG, COMPRESSION_QUALITY, it)
       it.flush()
     }
     return file

@@ -23,6 +23,14 @@ interface PostDao {
   fun getAllPosts(): LiveData<MutableList<Post>>
 
   /**
+   * Retrieves all posts from the local database as a simple list.
+   *
+   * @return A list of all posts.
+   */
+  @Query("SELECT * FROM posts")
+  suspend fun getAllPostsSync(): List<Post>
+
+  /**
    * Retrieves all posts created by a specific user, identified by their email.
    *
    * @param email The email of the creator.
@@ -55,4 +63,12 @@ interface PostDao {
    */
   @Delete
   suspend fun deletePost(post: Post)
+
+  /**
+   * Deletes multiple posts from the local database.
+   *
+   * @param posts The posts to delete.
+   */
+  @Delete
+  suspend fun deletePosts(posts: List<Post>)
 }
